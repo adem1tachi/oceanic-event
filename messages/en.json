@@ -1,0 +1,164 @@
+{
+  "meta": {
+    "title": "Forma Tak | Vote & Win a Free One-Day Intensive Course",
+    "description": "Vote for your favorite technology topic at the Forma Tak stand and enter our daily raffle to win a free full-day course."
+  },
+  "header": {
+    "eventBadge": "Forma Tak 2026",
+    "language": "Language",
+    "adminLink": "Admin Portal"
+  },
+  "hero": {
+    "hook": "Shape the Training. Win the Knowledge.",
+    "prizeSentence": "Vote for your preferred tech topic and enter the prize draw to win a free one-day intensive course on the winning subject.",
+    "badge": "Daily Trade Event Raffle"
+  },
+  "howItWorks": {
+    "title": "How it works",
+    "step1Title": "1. Vote for a Topic",
+    "step1Desc": "Tap your favorite course topic below to cast your instant vote.",
+    "step2Title": "2. Register for Draw",
+    "step2Desc": "Enter your contact details to participate in the exclusive raffle.",
+    "step3Title": "3. Win at End of Day",
+    "step3Desc": "Winners are drawn live at the stand to receive full-day course passes."
+  },
+  "voting": {
+    "title": "Choose Today's Winning Course Topic",
+    "subtitle": "Tap a topic card to vote instantly. Results update live.",
+    "voteButton": "Vote for this topic",
+    "votedBadge": "Your Choice",
+    "offlineNotice": "You appear to be offline. Please check your internet connection.",
+    "voteRecorded": "Vote recorded successfully!",
+    "voteError": "Could not record vote. Please try again."
+  },
+  "topics": {
+    "topic-a": {
+      "title": "Applied AI & LLMs in Production",
+      "tagline": "Practical generative AI, prompt engineering, and LLM integrations",
+      "description": "Master building, evaluating, and deploying production AI systems with robust retrieval-augmented generation and API orchestration."
+    },
+    "topic-b": {
+      "title": "Cloud Architecture & Modern DevOps",
+      "tagline": "Containerization, CI/CD pipelines, and high-availability systems",
+      "description": "Learn Kubernetes fundamentals, automated testing pipelines, and cost-efficient multi-cloud deployment strategies."
+    },
+    "topic-c": {
+      "title": "Cybersecurity & Threat Defense",
+      "tagline": "Penetration testing, application security, and incident response",
+      "description": "Protect enterprise web applications and network perimeters against modern attack vectors and data breaches."
+    }
+  },
+  "results": {
+    "title": "Live Stand Results",
+    "subtitle": "Updated every 5 seconds from stand votes",
+    "totalVotes": "Total Votes Cast",
+    "leadingTopic": "Current Leading Topic",
+    "leadingBadge": "Currently Winning",
+    "votedIndicator": "You voted for this",
+    "percentage": "{percent}%",
+    "voteCount": "{count, plural, =0 {0 votes} =1 {1 vote} other {# votes}}"
+  },
+  "cta": {
+    "headline": "Want a chance to win a free one-day course on {topic}?",
+    "subtext": "The topic with the most votes wins. Register now before the end-of-day draw!",
+    "button": "Register for the Prize Draw",
+    "alreadyRegistered": "Already registered? You're all set for the draw!"
+  },
+  "register": {
+    "title": "Enter the Prize Draw",
+    "subtitle": "Register your details in 30 seconds. One entry per visitor.",
+    "fullNameLabel": "Full Name",
+    "fullNamePlaceholder": "e.g., Karim Belkacem",
+    "phoneLabel": "Algerian Mobile Phone Number",
+    "phonePlaceholder": "05 / 06 / 07 XX XX XX XX",
+    "phoneHint": "Must be an active Algerian mobile number (Ooredoo, Mobilis, or Djezzy)",
+    "emailLabel": "Email Address (Optional)",
+    "emailPlaceholder": "karim@example.com",
+    "emailHint": "We will email you course materials if you win",
+    "consentLabel": "I agree to be contacted if I win the raffle and consent to event communications.",
+    "submitButton": "Submit Registration",
+    "submittingButton": "Registering...",
+    "backToResults": "Back to Live Results",
+    "duplicatePhone": "This mobile number is already registered for today's draw. Good luck!",
+    "genericError": "Registration could not be completed. Please try again or visit the stand desk."
+  },
+  "success": {
+    "title": "You're In the Draw!",
+    "badge": "Registration Confirmed",
+    "message": "Thank you for participating! The lucky winners will be drawn live at the stand at the end of the day.",
+    "prizeReminder": "If your chosen topic wins, you will receive a free seat in the one-day intensive course.",
+    "whatNextTitle": "What happens next?",
+    "whatNextStep1": "Keep your phone handy around closing time when we draw winners.",
+    "whatNextStep2": "We will call or message winners directly with access instructions.",
+    "viewResultsButton": "View Live Stand Results",
+    "changeVoteNote": "Want to support another topic? You can still cast more votes."
+  },
+  "validation": {
+    "name_min": "Full name must be at least 2 characters",
+    "name_max": "Full name cannot exceed 100 characters",
+    "name_invalid_chars": "Full name contains invalid characters",
+    "phone_required": "Mobile phone number is required",
+    "phone_invalid_algerian": "Please enter a valid Algerian mobile number (05, 06, or 07 followed by 8 digits)",
+    "email_invalid": "Please enter a valid email address",
+    "email_max": "Email cannot exceed 120 characters",
+    "consent_required": "You must accept the terms to enter the draw",
+    "bot_detected": "Automated submission rejected",
+    "invalid_topic_id": "Invalid topic selected",
+    "winner_count_int": "Winner count must be a whole number",
+    "winner_count_min": "Must draw at least 1 winner",
+    "winner_count_max": "Cannot draw more than 50 winners at once",
+    "password_min": "Password must be at least 6 characters"
+  },
+  "admin": {
+    "title": "Stand Administration",
+    "loginTitle": "Forma Tak Admin Portal",
+    "loginSubtitle": "Sign in with your authorized admin credentials",
+    "emailLabel": "Admin Email",
+    "passwordLabel": "Password",
+    "loginButton": "Sign In",
+    "loggingIn": "Signing in...",
+    "logoutButton": "Sign Out",
+    "unauthorized": "Access restricted: Your account does not have administrative permissions.",
+    "invalidCredentials": "Invalid email or password.",
+    "navOverview": "Overview & Results",
+    "navParticipants": "Participants",
+    "navRaffle": "Raffle Draw",
+    "navProjector": "Projector Display",
+    "resultsCardTitle": "Vote Totals & Course Selection",
+    "totalVotesCount": "Total Stand Votes: {count}",
+    "courseSelectedBanner": "Winning Topic for Free Course: {topic}",
+    "exportCsvButton": "Export Participants (CSV)",
+    "participantsTitle": "Registered Participants",
+    "searchPlaceholder": "Search by name or phone...",
+    "tableHeadName": "Full Name",
+    "tableHeadPhone": "Phone",
+    "tableHeadEmail": "Email",
+    "tableHeadLocale": "Locale",
+    "tableHeadTime": "Registered At",
+    "tableEmpty": "No participants registered yet.",
+    "paginationPrev": "Previous",
+    "paginationNext": "Next",
+    "paginationPage": "Page {current} of {total}",
+    "raffleTitle": "End-of-Day Raffle Draw",
+    "raffleSubtitle": "Randomly select winners for the free course from registered visitors.",
+    "numberInputLabel": "Number of Winners to Draw",
+    "drawButton": "Draw Winners",
+    "drawAgainButton": "Draw Additional Winners",
+    "drawingButton": "Drawing...",
+    "resetButton": "Reset Draw",
+    "resetConfirmTitle": "Reset All Drawn Winners?",
+    "resetConfirmDesc": "This will clear all existing winners from the database and restart the draw from Round 1. This action cannot be undone.",
+    "resetConfirmButton": "Yes, Clear All Winners",
+    "resetCancelButton": "Cancel",
+    "fewerEligibleWarning": "Notice: Only {count} eligible participants remained. All remaining participants were drawn.",
+    "noEligibleLeft": "All registered participants have already won! Register more visitors to draw more.",
+    "winnersListTitle": "Drawn Winners (Round {round})",
+    "noWinnersYet": "No winners drawn yet. Enter a count and tap Draw Winners.",
+    "openProjectorButton": "Launch Projector Screen",
+    "projectorTitle": "Forma Tak Grand Prize Draw",
+    "projectorSubtitle": "Congratulations to our lucky course winners!",
+    "projectorWinningTopic": "Winning Course Subject: {topic}",
+    "projectorRound": "Draw Round {round}",
+    "projectorExit": "Exit Fullscreen / Back to Admin"
+  }
+}
