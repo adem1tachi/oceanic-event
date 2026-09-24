@@ -32,6 +32,15 @@ export default function AdminLoginPage() {
     setIsSubmitting(true);
 
     try {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      if (!supabaseUrl || supabaseUrl.includes("placeholder-project")) {
+        setError(
+          "⚠️ ملف .env.local ما زال يحتوي على الرابط الوهمي (placeholder). يرجى وضع رابط مشروع Supabase الحقيقي ومفتاح anon في ملف .env.local ثم إعادة تشغيل السيرفر."
+        );
+        setIsSubmitting(false);
+        return;
+      }
+
       const supabase = createClient();
 
       // Authenticate with Supabase Auth
@@ -41,7 +50,19 @@ export default function AdminLoginPage() {
       });
 
       if (authError || !data.user) {
-        setError(t("invalidCredentials"));
+        console.error("Supabase Auth Error details:", authError);
+
+        if (authError?.message?.toLowerCase().includes("email not confirmed")) {
+          setError(
+            "البريد الإلكتروني لم يتم تأكيده بعد في Supabase. يرجى تفعيل خيار 'Auto Confirm User' أو تأكيد البريد من لوحة Supabase (Authentication -> Users -> Auto Confirm)."
+          );
+        } else if (authError?.message?.toLowerCase().includes("fetch")) {
+          setError(
+            "تعذر الاتصال بـ Supabase. يرجى التأكد من صحة رابط المشروع NEXT_PUBLIC_SUPABASE_URL في ملف .env.local والاتصال بالإنترنت."
+          );
+        } else {
+          setError(t("invalidCredentials") + ` (${authError?.message || "Invalid credentials"})`);
+        }
         setIsSubmitting(false);
         return;
       }
@@ -53,10 +74,16 @@ export default function AdminLoginPage() {
         .eq("user_id", data.user.id)
         .maybeSingle();
 
-      if (adminCheckError || !adminRecord) {
+      if (adminCheckError) {
+        console.error("Admin check error:", adminCheckError);
+      }
+
+      if (!adminRecord) {
         // Not an authorized admin - immediately sign them out
         await supabase.auth.signOut();
-        setError(t("unauthorized"));
+        setError(
+          t("unauthorized") + ` (المستخدم موجود في Auth ولكن لم تتم إضافته إلى جدول public.admins بـ UUID: ${data.user.id})`
+        );
         setIsSubmitting(false);
         return;
       }
@@ -64,9 +91,9 @@ export default function AdminLoginPage() {
       // Successful admin login
       router.push("/admin");
       router.refresh();
-    } catch (err) {
-      console.error("Login failure:", err);
-      setError("An unexpected error occurred during login.");
+    } catch (err: any) {
+      console.error("Login failure exception:", err);
+      setError(`خطأ أثناء تسجيل الدخول: ${err?.message || "Internal error"}`);
       setIsSubmitting(false);
     }
   };
