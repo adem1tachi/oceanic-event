@@ -26,14 +26,25 @@ export async function POST() {
       return NextResponse.json({ error: "Forbidden: Not an admin" }, { status: 403 });
     }
 
-    // Call reset_draw RPC via admin client
-    const adminSupabase = createAdminClient();
-    const { error } = await adminSupabase.rpc("reset_draw");
+    // Call reset_draw RPC with user session first (so auth.uid() is preserved)
+    let { error } = await supabase.rpc("reset_draw");
+
+    // If user RPC failed, fallback to service-role client
+    if (error) {
+      console.warn("[API Admin Reset] User session RPC call failed, trying service-role:", error.message);
+      try {
+        const adminSupabase = createAdminClient();
+        const adminRes = await adminSupabase.rpc("reset_draw");
+        error = adminRes.error;
+      } catch (adminClientErr: any) {
+        console.error("[API Admin Reset] Service-role fallback error:", adminClientErr?.message);
+      }
+    }
 
     if (error) {
       console.error("[API Admin Reset] Error calling reset_draw:", error.message);
       return NextResponse.json(
-        { error: "Failed to reset raffle draw" },
+        { error: error.message || "Failed to reset raffle draw" },
         { status: 500 }
       );
     }

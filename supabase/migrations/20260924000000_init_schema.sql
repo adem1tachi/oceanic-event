@@ -63,8 +63,12 @@ SECURITY DEFINER
 STABLE
 SET search_path = public
 AS $$
-    SELECT EXISTS (
-        SELECT 1 FROM public.admins WHERE user_id = auth.uid()
+    SELECT (
+        auth.role() = 'service_role'
+        OR coalesce(current_setting('request.jwt.claim.role', true), '') = 'service_role'
+        OR (auth.uid() IS NOT NULL AND EXISTS (
+            SELECT 1 FROM public.admins WHERE user_id = auth.uid()
+        ))
     );
 $$;
 

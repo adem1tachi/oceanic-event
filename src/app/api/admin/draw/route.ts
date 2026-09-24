@@ -40,11 +40,29 @@ export async function POST(request: NextRequest) {
 
     const { winnerCount } = validation.data;
 
-    // Call draw_winners RPC via admin client (or user client since user is in admins)
-    const adminSupabase = createAdminClient();
-    const { data: winners, error } = await adminSupabase.rpc("draw_winners", {
+    // Call draw_winners RPC with authenticated user session first (so auth.uid() is preserved)
+    let { data: winners, error } = await supabase.rpc("draw_winners", {
       n: winnerCount,
     });
+
+    // If user RPC failed, fallback to privileged service-role admin client
+    if (error) {
+      console.warn("[API Admin Draw] User session RPC call failed, attempting service-role client:", error.message);
+      try {
+        const adminSupabase = createAdminClient();
+        const adminRes = await adminSupabase.rpc("draw_winners", {
+          n: winnerCount,
+        });
+        if (!adminRes.error) {
+          winners = adminRes.data;
+          error = null;
+        } else {
+          error = adminRes.error;
+        }
+      } catch (adminClientErr: any) {
+        console.error("[API Admin Draw] Service-role fallback error:", adminClientErr?.message);
+      }
+    }
 
     if (error) {
       console.error("[API Admin Draw] RPC error:", error.message);
