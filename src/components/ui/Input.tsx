@@ -52,10 +52,10 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             aria-describedby={
               error ? errorId : hint ? hintId : undefined
             }
-            className={`w-full rounded-md border text-base text-token-primary bg-bg-surface px-3.5 py-3 min-h-[48px] placeholder:text-token-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-highlight disabled:bg-bg-surface-raised disabled:text-token-muted disabled:cursor-not-allowed transition-colors ${
+            className={`w-full rounded-xl border border-white/15 text-sm sm:text-base text-token-primary bg-[#0A1124] focus:bg-[#0A1124] px-3.5 py-3 min-h-[46px] placeholder:text-token-muted/50 focus:outline-none focus:ring-2 disabled:bg-white/5 disabled:text-slate-500 disabled:cursor-not-allowed transition-all ${
               error
-                ? "border-feedback-error focus-visible:outline-feedback-error bg-feedback-error-subtle/30"
-                : "border-border hover:border-border-strong focus-visible:border-highlight"
+                ? "border-red-500 focus:border-red-500 ring-2 ring-red-500/20 bg-red-950/20"
+                : "hover:border-white/25 focus:border-brand-orange-gold focus:ring-brand-orange-gold/30"
             } ${className}`}
             {...props}
           />
@@ -64,16 +64,6 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         {hint && !error && (
           <p id={hintId} className="text-xs text-token-muted">
             {hint}
-          </p>
-        )}
-
-        {error && (
-          <p
-            id={errorId}
-            role="alert"
-            className="text-xs font-medium text-feedback-error flex items-center gap-1"
-          >
-            <span>{error}</span>
           </p>
         )}
       </div>

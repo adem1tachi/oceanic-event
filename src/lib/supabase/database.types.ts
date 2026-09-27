@@ -9,11 +9,35 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
+      app_settings: {
+        Row: {
+          id: number;
+          is_registration_open: boolean;
+          event_date: string | null;
+          contact_statuses: Json;
+        };
+        Insert: {
+          id?: number;
+          is_registration_open?: boolean;
+          event_date?: string | null;
+          contact_statuses?: Json;
+        };
+        Update: {
+          id?: number;
+          is_registration_open?: boolean;
+          event_date?: string | null;
+          contact_statuses?: Json;
+        };
+        Relationships: [];
+      };
       topics: {
         Row: {
           id: string;
           slug: string;
           position: number;
+          title: string | null;
+          description: string | null;
+          image_url: string | null;
           is_active: boolean;
           created_at: string;
         };
@@ -21,6 +45,9 @@ export interface Database {
           id?: string;
           slug: string;
           position?: number;
+          title?: string | null;
+          description?: string | null;
+          image_url?: string | null;
           is_active?: boolean;
           created_at?: string;
         };
@@ -28,6 +55,9 @@ export interface Database {
           id?: string;
           slug?: string;
           position?: number;
+          title?: string | null;
+          description?: string | null;
+          image_url?: string | null;
           is_active?: boolean;
           created_at?: string;
         };
@@ -71,6 +101,12 @@ export interface Database {
           consent: boolean;
           locale: string;
           created_at: string;
+          first_name: string | null;
+          last_name: string | null;
+          position: string | null;
+          company: string | null;
+          desired_topic: string | null;
+          people_count: number | null;
         };
         Insert: {
           id?: string;
@@ -80,6 +116,12 @@ export interface Database {
           consent?: boolean;
           locale?: string;
           created_at?: string;
+          first_name?: string | null;
+          last_name?: string | null;
+          position?: string | null;
+          company?: string | null;
+          desired_topic?: string | null;
+          people_count?: number | null;
         };
         Update: {
           id?: string;
@@ -89,6 +131,12 @@ export interface Database {
           consent?: boolean;
           locale?: string;
           created_at?: string;
+          first_name?: string | null;
+          last_name?: string | null;
+          position?: string | null;
+          company?: string | null;
+          desired_topic?: string | null;
+          people_count?: number | null;
         };
         Relationships: [];
       };

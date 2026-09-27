@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>OCEANIC — Formatech 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --deep:#0A1124;
+    --navy:#12223B;
+    --teal:#0E3B4F;
+    --rust:#B5500C;
+    --amber:#CD6E10;
+    --gold:#E88607;
+    --ink:#EAF0F6;
+    --ink-dim:#9FB1C6;
+    --line:rgba(234,240,246,.12);
+    --radius:14px;
+    --maxw:1140px;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+    box-sizing:border-box;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;scroll-padding-top:env(safe-area-inset-top,0px);}
+  body{
+    margin:0;
+    background:var(--deep);
+    color:var(--ink);
+    font-family:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
+    line-height:1.6;
+    overflow-x:hidden;
+  }
+  h1,h2,h3,.display{font-family:'Space Grotesk',system-ui,sans-serif;font-weight:600;letter-spacing:-.01em;margin:0;}
+  a{color:inherit;}
+  img,svg{max-width:100%;display:block;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px;}
+  section{padding:96px 0;position:relative;}
+  @media(max-width:640px){section{padding:64px 0;}}
+  .eyebrow-inline{color:var(--gold);font-weight:600;}
+
+  /* background texture: soft depth-line grid, oceanic feel without gradient cliché */
+  .depth-lines{position:absolute;inset:0;pointer-events:none;opacity:.35;
+    background-image:repeating-linear-gradient(180deg, transparent 0 78px, var(--line) 78px 79px);
+    mask-image:linear-gradient(180deg, transparent, black 20%, black 80%, transparent);
+  }
+
+  /* ---------- HERO ---------- */
+  .hero{background:linear-gradient(180deg,var(--deep),var(--navy) 70%);padding-top:64px;}
+  .hero .wrap{position:relative;z-index:1;}
+  .brandbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:72px;}
+  .brandmark{display:flex;align-items:center;gap:12px;}
+  .brandmark svg{width:34px;height:34px;}
+  .brandmark span{font-family:'Space Grotesk';font-weight:700;font-size:1.15rem;letter-spacing:.02em;}
+  .fair-tag{font-size:.85rem;color:var(--ink-dim);border:1px solid var(--line);border-radius:999px;padding:6px 14px;}
+  .hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:56px;align-items:end;}
+  @media(max-width:860px){.hero-grid{grid-template-columns:1fr;}}
+  .hero h1{font-size:clamp(2.4rem,5.6vw,4.1rem);line-height:1.04;max-width:12ch;}
+  .hero h1 .accent{color:var(--gold);}
+  .hero p.tagline{margin-top:22px;max-width:46ch;color:var(--ink-dim);font-size:1.08rem;}
+
+  .gauge{background:var(--navy);border:1px solid var(--line);border-radius:var(--radius);padding:28px;}
+  .gauge-label{font-size:.8rem;color:var(--ink-dim);margin-bottom:16px;}
+  .gauge-row{display:flex;gap:10px;}
+  .gauge-unit{flex:1;text-align:center;background:var(--deep);border:1px solid var(--line);border-radius:10px;padding:14px 6px;}
+  .gauge-unit .n{font-family:'Space Grotesk';font-size:clamp(1.5rem,3.4vw,2.1rem);font-weight:700;color:var(--gold);font-variant-numeric:tabular-nums;}
+  .gauge-unit .u{font-size:.68rem;color:var(--ink-dim);margin-top:4px;}
+  .gauge-note{margin-top:16px;font-size:.85rem;color:var(--ink-dim);}
+
+  /* ---------- VOTE ---------- */
+  .vote{background:var(--navy);}
+  .section-head{max-width:56ch;margin-bottom:48px;}
+  .section-head h2{font-size:clamp(1.7rem,3.4vw,2.4rem);}
+  .section-head p{color:var(--ink-dim);margin-top:12px;}
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+  @media(max-width:860px){.cards{grid-template-columns:1fr;}}
+  .card{background:var(--deep);border:1px solid var(--line);border-radius:var(--radius);padding:26px;cursor:pointer;transition:border-color .2s ease, transform .2s ease;}
+  .card:hover{border-color:var(--amber);}
+  .card:focus-visible{outline:2px solid var(--gold);outline-offset:3px;}
+  .card h3{font-size:1.15rem;margin-bottom:10px;}
+  .card p{color:var(--ink-dim);font-size:.92rem;margin:0 0 18px;}
+  .card .bar-track{height:8px;border-radius:99px;background:var(--teal);overflow:hidden;display:none;}
+  .card .bar-fill{height:100%;background:linear-gradient(90deg,var(--rust),var(--gold));width:0%;transition:width .6s ease;}
+  .card .pct{display:none;margin-top:8px;font-size:.85rem;color:var(--gold);font-weight:600;}
+  .card.voted{border-color:var(--gold);}
+  .card.voted .bar-track,.card.voted .pct{display:block;}
+  .card .pick-btn{margin-top:4px;font-size:.85rem;color:var(--ink-dim);}
+  .card.voted .pick-btn::after{content:" — recorded";color:var(--gold);}
+  .vote-note{margin-top:22px;font-size:.85rem;color:var(--ink-dim);}
+
+  /* ---------- REGISTRATION ---------- */
+  .register{background:var(--deep);}
+  .register-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:56px;}
+  @media(max-width:860px){.register-grid{grid-template-columns:1fr;}}
+  .register-aside h2{font-size:clamp(1.7rem,3.4vw,2.3rem);}
+  .register-aside p{color:var(--ink-dim);margin-top:14px;max-width:38ch;}
+  form{background:var(--navy);border:1px solid var(--line);border-radius:var(--radius);padding:28px;}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:520px){.field-row{grid-template-columns:1fr;}}
+  label{display:block;font-size:.82rem;color:var(--ink-dim);margin:16px 0 6px;}
+  .field-row label{margin-top:0;}
+  input,select{width:100%;background:var(--deep);border:1px solid var(--line);border-radius:8px;color:var(--ink);padding:11px 12px;font-size:.95rem;font-family:inherit;}
+  input:focus,select:focus{outline:2px solid var(--gold);outline-offset:1px;border-color:var(--gold);}
+  .req::after{content:" *";color:var(--gold);}
+  .submit-btn{margin-top:24px;width:100%;background:linear-gradient(90deg,var(--rust),var(--amber));color:var(--ink);border:none;border-radius:8px;padding:13px;font-size:.98rem;font-weight:600;font-family:inherit;cursor:pointer;}
+  .submit-btn:hover{filter:brightness(1.08);}
+  .confirm{display:none;text-align:center;padding:10px;}
+  .confirm.show{display:block;}
+  form.hide-fields{display:none;}
+  .confirm h3{font-size:1.3rem;margin-bottom:10px;}
+  .confirm p{color:var(--ink-dim);}
+  .confirm .contact{margin-top:20px;padding-top:20px;border-top:1px solid var(--line);font-size:.9rem;}
+
+  /* ---------- WHEEL ---------- */
+  .wheel-sec{background:var(--teal);text-align:center;}
+  .wheel-sec .wrap{display:flex;flex-direction:column;align-items:center;}
+  .wheel-wrap{position:relative;width:min(320px,70vw);margin:24px auto 8px;filter:grayscale(1) brightness(.75);}
+  .wheel-wrap .pin{position:absolute;top:-6px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:10px solid transparent;border-right:10px solid transparent;border-top:16px solid var(--ink-dim);}
+  .lock-msg{margin-top:22px;font-size:.95rem;color:var(--ink-dim);max-width:40ch;}
+  .lock-msg strong{color:var(--ink);}
+
+  /* ---------- ABOUT ---------- */
+  .about{background:var(--navy);}
+  .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start;}
+  @media(max-width:860px){.about-grid{grid-template-columns:1fr;}}
+  .about h2{font-size:clamp(1.7rem,3.4vw,2.3rem);}
+  .about p{color:var(--ink-dim);margin-top:16px;max-width:44ch;}
+  .div-list{display:flex;flex-direction:column;gap:18px;}
+  .div-item{display:flex;gap:16px;align-items:flex-start;background:var(--deep);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;}
+  .div-item svg{width:30px;height:30px;flex:none;color:var(--gold);}
+  .div-item h3{font-size:1.02rem;margin-bottom:4px;}
+  .div-item p{margin:0;font-size:.88rem;color:var(--ink-dim);}
+
+  footer{padding:32px 0;text-align:center;color:var(--ink-dim);font-size:.82rem;background:var(--deep);border-top:1px solid var(--line);}
+  @media (prefers-reduced-motion: reduce){*{transition:none !important;}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="depth-lines"></div>
+  <div class="wrap">
+    <div class="brandbar">
+      <div class="brandmark">
+        <svg viewBox="0 0 40 40" fill="none"><path d="M4 24c4-6 8-6 12 0s8 6 12 0 8-6 12 0" stroke="#E88607" stroke-width="3" stroke-linecap="round"/><path d="M4 32c4-6 8-6 12 0s8 6 12 0 8-6 12 0" stroke="#EAF0F6" stroke-width="2" stroke-linecap="round" opacity=".4"/></svg>
+        <span>OCEANIC</span>
+      </div>
+      <div class="fair-tag">Formatech 2026 · Exhibitor Stand</div>
+    </div>
+    <div class="hero-grid">
+      <div>
+        <h1>Vote a topic.<br>Win a <span class="accent">free training day.</span></h1>
+        <p class="tagline">OCEANIC is at Formatech 2026 with a live challenge for visitors: pick the training topic you want most, enter the draw, and one lucky winner walks away with a full day of expert training — on us.</p>
+      </div>
+      <div class="gauge">
+        <div class="gauge-label">Time left before the draw</div>
+        <div class="gauge-row" id="countdown">
+          <div class="gauge-unit"><div class="n" data-u="d">00</div><div class="u">days</div></div>
+          <div class="gauge-unit"><div class="n" data-u="h">00</div><div class="u">hrs</div></div>
+          <div class="gauge-unit"><div class="n" data-u="m">00</div><div class="u">min</div></div>
+          <div class="gauge-unit"><div class="n" data-u="s">00</div><div class="u">sec</div></div>
+        </div>
+        <div class="gauge-note">Drawn live at the OCEANIC stand, closing day of the fair.</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="vote" id="vote">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Choose the training you want most</h2>
+      <p>One vote per visitor. Results update live below — the leading topic becomes the prize.</p>
+    </div>
+    <div class="cards" id="voteCards">
+      <div class="card" data-topic="a" tabindex="0" role="button">
+        <h3>[Topic A — e.g. Predictive Quality Monitoring]</h3>
+        <p>[One-line description of what this training day covers.]</p>
+        <div class="bar-track"><div class="bar-fill"></div></div>
+        <div class="pct">0% of votes</div>
+        <div class="pick-btn">Tap to vote</div>
+      </div>
+      <div class="card" data-topic="b" tabindex="0" role="button">
+        <h3>[Topic B — e.g. Field Data Consulting]</h3>
+        <p>[One-line description of what this training day covers.]</p>
+        <div class="bar-track"><div class="bar-fill"></div></div>
+        <div class="pct">0% of votes</div>
+        <div class="pick-btn">Tap to vote</div>
+      </div>
+      <div class="card" data-topic="c" tabindex="0" role="button">
+        <h3>[Topic C — e.g. Advanced Site Monitoring]</h3>
+        <p>[One-line description of what this training day covers.]</p>
+        <div class="bar-track"><div class="bar-fill"></div></div>
+        <div class="pct">0% of votes</div>
+        <div class="pick-btn">Tap to vote</div>
+      </div>
+    </div>
+    <div class="vote-note">Voted already? Your choice is remembered on this device.</div>
+  </div>
+</section>
+
+<section class="register" id="register">
+  <div class="wrap register-grid">
+    <div class="register-aside">
+      <h2>Enter the draw</h2>
+      <p>Leave your details and you're in. Winners are contacted by WhatsApp right after the draw.</p>
+    </div>
+    <div>
+      <form id="regForm">
+        <div class="field-row">
+          <div><label class="req">Last name</label><input required name="lastName" autocomplete="family-name"></div>
+          <div><label class="req">First name</label><input required name="firstName" autocomplete="given-name"></div>
+        </div>
+        <div class="field-row">
+          <div><label class="req">Position</label><input required name="position"></div>
+          <div><label class="req">Company</label><input required name="company" autocomplete="organization"></div>
+        </div>
+        <label class="req">WhatsApp number</label>
+        <input required name="whatsapp" type="tel" inputmode="tel" autocomplete="tel" placeholder="e.g. 05XX XX XX XX">
+        <div class="field-row">
+          <div>
+            <label>Desired training topic</label>
+            <select name="desiredTopic">
+              <option value="">No preference</option>
+              <option>Topic A</option>
+              <option>Topic B</option>
+              <option>Topic C</option>
+            </select>
+          </div>
+          <div><label>People to train</label><input name="headcount" type="number" min="1" inputmode="numeric" placeholder="e.g. 4"></div>
+        </div>
+        <button class="submit-btn" type="submit">Enter the draw</button>
+      </form>
+      <div class="confirm" id="confirm">
+        <h3>You're entered 🎉</h3>
+        <p>Good luck — winners are announced at the OCEANIC stand at the end of the fair.</p>
+        <div class="contact">Questions? Reach OCEANIC at [phone / email] or visit us at [stand number].</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="wheel-sec">
+  <div class="wrap">
+    <h2>The draw</h2>
+    <div class="wheel-wrap">
+      <div class="pin"></div>
+      <svg viewBox="0 0 200 200">
+        <circle cx="100" cy="100" r="96" fill="#12223B" stroke="#9FB1C6" stroke-width="2"/>
+        <g stroke="#9FB1C6" stroke-width="1.5">
+          <line x1="100" y1="4" x2="100" y2="196"/><line x1="4" y1="100" x2="196" y2="100"/>
+          <line x1="32" y1="32" x2="168" y2="168"/><line x1="168" y1="32" x2="32" y2="168"/>
+        </g>
+        <circle cx="100" cy="100" r="10" fill="#E88607"/>
+      </svg>
+    </div>
+    <p class="lock-msg"><strong>The draw takes place at the end of the fair — stay tuned!</strong><br>Only the OCEANIC team can spin the wheel.</p>
+  </div>
+</section>
+
+<section class="about">
+  <div class="wrap about-grid">
+    <div>
+      <h2>About OCEANIC</h2>
+      <p>[Two to three sentences on OCEANIC: who you are, what you do, and why visitors should trust you with their training, consulting or monitoring needs. Replace with the firm's real positioning.]</p>
+    </div>
+    <div class="div-list">
+      <div class="div-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M8 12h8M12 8v8"/></svg>
+        <div><h3>Consulting</h3><p>Guidance to structure and strengthen your operations.</p></div>
+      </div>
+      <div class="div-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19V6a2 2 0 0 1 2-2h9l5 5v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/><path d="M9 13h6M9 17h6"/></svg>
+        <div><h3>Training</h3><p>Hands-on sessions that build real, applicable skills.</p></div>
+      </div>
+      <div class="div-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>
+        <div><h3>Monitoring</h3><p>Continuous oversight to keep performance on track.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>© 2026 OCEANIC — Formatech 2026</footer>
+
+<script>
+  // ----- Countdown: placeholder target, set the real draw date/time here -----
+  const target = new Date("2026-11-20T18:00:00").getTime();
+  function tick(){
+    const diff = Math.max(0, target - Date.now());
+    const d = Math.floor(diff/864e5), h = Math.floor(diff/36e5)%24,
+          m = Math.floor(diff/6e4)%60, s = Math.floor(diff/1000)%60;
+    const set = (u,v)=>{const el=document.querySelector(`[data-u="${u}"]`); if(el) el.textContent=String(v).padStart(2,'0');};
+    set('d',d); set('h',h); set('m',m); set('s',s);
+  }
+  tick(); setInterval(tick,1000);
+
+  // ----- Voting demo (client-side only; wire to backend later) -----
+  const cards = document.querySelectorAll('#voteCards .card');
+  const KEY = 'oceanic_vote_choice';
+  function renderResults(){
+    const counts = JSON.parse(localStorage.getItem('oceanic_vote_counts') || '{"a":4,"b":3,"c":2}');
+    const total = Object.values(counts).reduce((a,b)=>a+b,0) || 1;
+    cards.forEach(c=>{
+      const t = c.dataset.topic;
+      const pct = Math.round((counts[t]/total)*100);
+      c.querySelector('.bar-fill').style.width = pct + '%';
+      c.querySelector('.pct').textContent = pct + '% of votes';
+    });
+  }
+  function castVote(topic){
+    if(localStorage.getItem(KEY)) return;
+    const counts = JSON.parse(localStorage.getItem('oceanic_vote_counts') || '{"a":4,"b":3,"c":2}');
+    counts[topic] = (counts[topic]||0) + 1;
+    localStorage.setItem('oceanic_vote_counts', JSON.stringify(counts));
+    localStorage.setItem(KEY, topic);
+    cards.forEach(c=>c.classList.toggle('voted', c.dataset.topic===topic));
+    renderResults();
+    document.getElementById('register').scrollIntoView({behavior:'smooth'});
+  }
+  cards.forEach(c=>{
+    c.addEventListener('click',()=>castVote(c.dataset.topic));
+    c.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();castVote(c.dataset.topic);}});
+  });
+  const already = localStorage.getItem(KEY);
+  if(already){ cards.forEach(c=>c.classList.toggle('voted', c.dataset.topic===already)); }
+  renderResults();
+
+  // ----- Registration demo -----
+  document.getElementById('regForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    this.classList.add('hide-fields');
+    document.getElementById('confirm').classList.add('show');
+  });
+</script>
+</body>
+</html>

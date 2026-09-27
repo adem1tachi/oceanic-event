@@ -1,43 +1,47 @@
 "use client";
 
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { LanguageSwitcher } from "./LanguageSwitcher";
-import { ShieldCheck } from "lucide-react";
+import { FormaTechLogo } from "./FormaTechLogo";
 
 export function Header() {
   const t = useTranslations("header");
 
   return (
-    <header className="w-full border-b border-border bg-bg-surface sticky top-0 z-30 shadow-xs">
-      <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+    <header className="w-full border-b border-white/10 bg-[#0A1124]/90 backdrop-blur-md sticky top-0 z-40 shadow-md transition-colors">
+      <div className="max-w-5xl mx-auto px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between gap-2 sm:gap-4">
+        {/* Brand Co-Header: OCEANIC x FormaTech 2026 */}
         <Link
           href="/"
-          className="flex items-center gap-2 group focus-visible:outline-2 focus-visible:outline-highlight rounded-md p-1"
+          className="flex items-center gap-2 sm:gap-4 group focus-visible:outline-2 focus-visible:outline-highlight rounded-lg p-0.5 sm:p-1 transition-opacity hover:opacity-95 shrink-0"
+          aria-label="OCEANIC x Formatech 2026"
         >
-          <div className="w-8 h-8 rounded-md bg-action text-action-fg flex items-center justify-center font-black text-sm tracking-wider shadow-sm">
-            FT
+          {/* OCEANIC Logo - Crisp white in dark theme */}
+          <div className="relative flex items-center justify-center h-8 w-20 sm:h-10 sm:w-28 shrink-0">
+            <Image
+              src="/logo-oceanic.png"
+              alt={t("oceanicBadge")}
+              width={112}
+              height={44}
+              priority
+              className="object-contain max-h-full max-w-full brightness-0 invert drop-shadow-[0_2px_10px_rgba(255,255,255,0.1)]"
+            />
           </div>
-          <div className="text-start">
-            <span className="font-extrabold text-base tracking-tight text-token-primary block leading-tight">
-              {t("eventBadge")}
-            </span>
-            <span className="text-[10px] text-token-muted uppercase tracking-widest block font-medium">
-              Tech Expo 2026
-            </span>
+
+          {/* Elegant Divider */}
+          <div className="h-5 sm:h-6 w-px bg-white/20 shrink-0" aria-hidden="true" />
+
+          {/* FormaTech Expo Logo */}
+          <div className="flex items-center justify-center shrink-0">
+            <FormaTechLogo className="h-6 sm:h-8 w-auto text-[#EAF0F6]" />
           </div>
         </Link>
 
-        <div className="flex items-center gap-3">
+        {/* Right Actions: Language Switcher */}
+        <div className="flex items-center gap-1 sm:gap-3 shrink-0">
           <LanguageSwitcher />
-          <Link
-            href="/admin"
-            className="text-xs text-token-muted hover:text-token-primary p-2 rounded-md hover:bg-bg-surface-raised flex items-center gap-1 transition-colors"
-            title={t("adminLink")}
-            aria-label={t("adminLink")}
-          >
-            <ShieldCheck className="w-4 h-4" />
-          </Link>
         </div>
       </div>
     </header>

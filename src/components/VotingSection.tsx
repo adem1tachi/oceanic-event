@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { TopicCard, type TopicItem } from "./TopicCard";
-import { RegisterCta } from "./RegisterCta";
-import { BarChart3, RefreshCw } from "lucide-react";
+import { CheckCircle2, ArrowDown, Award } from "lucide-react";
 
 export interface VoteData {
   topic_id: string;
@@ -70,7 +69,7 @@ export function VotingSection({
           setCounts(data.results);
         }
       }
-    } catch (err) {
+    } catch {
       // Polling network errors handled silently; UI keeps existing data
     } finally {
       if (showIndicator) setIsRefreshing(false);
@@ -95,10 +94,10 @@ export function VotingSection({
     return Number(current.count) > Number(prev.count) ? current : prev;
   }, null);
 
-  const leadingTopicSlug = leadingTopic?.topic_slug || "topic-a";
-
   // Handle vote with Optimistic UI updates
   const handleVote = async (topicId: string, slug: string) => {
+    if (hasVotedAny || isVoting) return;
+
     setIsVoting(true);
     setVoteFeedback(null);
 
@@ -113,7 +112,7 @@ export function VotingSection({
       )
     );
 
-    // Save to localStorage for UX returning visitor persistence
+    // Save to localStorage for single-vote persistence
     try {
       localStorage.setItem(LOCAL_STORAGE_VOTE_KEY, slug);
     } catch {
@@ -129,77 +128,57 @@ export function VotingSection({
       });
 
       if (!res.ok) {
-        const errorData = await res.json();
-        console.error("Vote submission error:", errorData);
         setVoteFeedback(t("voting.voteError"));
       } else {
         setVoteFeedback(t("voting.voteRecorded"));
         // Re-fetch latest accurate totals from DB
         fetchResults(false);
       }
-    } catch (err) {
-      console.error("Vote network error:", err);
+    } catch {
       setVoteFeedback(t("voting.voteError"));
     } finally {
       setIsVoting(false);
-      // Auto clear feedback message after 3 seconds
-      setTimeout(() => setVoteFeedback(null), 3000);
+      setTimeout(() => setVoteFeedback(null), 4000);
     }
   };
 
   return (
-    <section className="w-full my-6 text-start" aria-labelledby="voting-heading">
+    <section id="voting" className="w-full text-start scroll-mt-24 overflow-hidden" aria-labelledby="voting-heading">
       {/* Section Header */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 mb-6">
-        <div>
-          <h2
-            id="voting-heading"
-            className="text-xl sm:text-2xl font-black text-token-primary tracking-tight"
-          >
-            {hasVotedAny ? t("results.title") : t("voting.title")}
-          </h2>
-          <p className="text-xs sm:text-sm text-token-secondary mt-1">
-            {hasVotedAny ? t("results.subtitle") : t("voting.subtitle")}
-          </p>
+      <div className="mb-6 sm:mb-8 max-w-2xl">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-orange-gold/15 text-brand-orange-gold border border-brand-orange-gold/30 text-xs font-bold uppercase tracking-wider mb-3">
+          <Award className="w-3.5 h-3.5" />
+          <span>{t("voting.badge")}</span>
         </div>
-
-        {hasVotedAny && (
-          <div className="flex items-center gap-3 text-xs text-token-muted font-medium self-start sm:self-auto">
-            <span className="flex items-center gap-1 font-bold text-token-primary">
-              <BarChart3 className="w-4 h-4 text-highlight" />
-              <span>{t("results.totalVotes")}: {totalVotes}</span>
-            </span>
-            <button
-              onClick={() => fetchResults(true)}
-              className="p-1.5 rounded hover:bg-bg-surface-raised transition-colors focus-visible:outline-highlight"
-              title="Refresh results"
-              aria-label="Refresh results"
-            >
-              <RefreshCw
-                className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin" : ""}`}
-              />
-            </button>
-          </div>
-        )}
+        <h2
+          id="voting-heading"
+          className="text-2xl sm:text-3xl font-black text-token-primary tracking-tight"
+        >
+          {t("voting.title")}
+        </h2>
+        <p className="text-xs sm:text-sm text-token-secondary mt-2 leading-relaxed">
+          {t("voting.subtitle")}
+        </p>
       </div>
 
       {/* Temporary feedback banner */}
       {voteFeedback && (
         <div
           role="status"
-          className="mb-4 p-3 rounded-md bg-highlight-subtle border border-highlight/30 text-xs font-semibold text-highlight flex items-center justify-between"
+          className="mb-6 p-4 rounded-xl bg-emerald-950/40 text-xs sm:text-sm font-bold text-emerald-300 flex items-center gap-2 shadow-xs transition-all border border-emerald-500/30"
         >
+          <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
           <span>{voteFeedback}</span>
         </div>
       )}
 
-      {/* 3 Large Topic Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      {/* 3 Topic Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {initialTopics.map((topic) => {
           const countData = counts.find((c) => c.topic_id === topic.id);
           const voteCount = countData ? Number(countData.count) : 0;
           const isVoted = votedTopicSlug === topic.slug;
-          const isLeading = leadingTopic?.topic_id === topic.id;
+          const isLeading = leadingTopic?.topic_id === topic.id && totalVotes > 0;
 
           return (
             <TopicCard
@@ -217,9 +196,17 @@ export function VotingSection({
         })}
       </div>
 
-      {/* Slide-in CTA right after results are revealed */}
+      {/* Small action button below cards once user has voted */}
       {hasVotedAny && (
-        <RegisterCta leadingTopicSlug={leadingTopicSlug} />
+        <div className="mt-8 flex justify-center">
+          <a
+            href="#register"
+            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-brand-orange-rust to-brand-orange-gold hover:brightness-110 text-white text-xs sm:text-sm font-bold shadow-md hover:shadow-lg transition-all active:scale-[0.99]"
+          >
+            <span>{t("voting.goToRegister")}</span>
+            <ArrowDown className="w-3.5 h-3.5 text-white" />
+          </a>
+        </div>
       )}
     </section>
   );

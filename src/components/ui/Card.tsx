@@ -16,13 +16,13 @@ export function Card({
 }: CardProps) {
   return (
     <Component
-      className={`rounded-lg bg-bg-surface border p-5 transition-all text-start ${
+      className={`rounded-2xl bg-[#12223B] transition-all text-start overflow-hidden border ${
         selected
-          ? "border-highlight ring-2 ring-highlight bg-highlight-subtle/30 shadow-md"
-          : "border-border hover:border-border-strong shadow-sm"
+          ? "border-brand-orange-gold ring-1 ring-brand-orange-gold shadow-[0_0_24px_rgba(232,134,7,0.2)]"
+          : "border-white/10 hover:border-brand-orange-amber/60 shadow-sm"
       } ${
         interactive
-          ? "cursor-pointer active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-highlight focus-visible:outline-offset-2"
+          ? "cursor-pointer active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-brand-orange-gold focus-visible:outline-offset-2"
           : ""
       } ${className}`}
       {...props}

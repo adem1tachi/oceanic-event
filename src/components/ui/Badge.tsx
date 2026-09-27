@@ -18,10 +18,10 @@ export function Badge({
   };
 
   const variantStyles = {
-    neutral: "bg-bg-surface-raised text-token-secondary border border-border",
-    highlight: "bg-highlight text-highlight-fg font-medium",
-    success: "bg-feedback-success-subtle text-feedback-success border border-feedback-success/20 font-medium",
-    error: "bg-feedback-error-subtle text-feedback-error border border-feedback-error/20 font-medium",
+    neutral: "bg-white/10 text-slate-200 font-semibold border border-white/10",
+    highlight: "bg-brand-orange-gold/15 text-brand-orange-gold font-bold border border-brand-orange-gold/30",
+    success: "bg-emerald-500/15 text-emerald-400 font-bold border border-emerald-500/30",
+    error: "bg-rose-500/15 text-rose-400 font-bold border border-rose-500/30",
   };
 
   return (

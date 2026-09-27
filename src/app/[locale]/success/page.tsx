@@ -85,7 +85,7 @@ export default async function SuccessPage({
       </main>
 
       <footer className="w-full border-t border-border bg-bg-surface py-4 text-center text-xs text-token-muted">
-        <p>Forma Tak 2026 • Trade Event Stand</p>
+        <p>FormaTech 2026 • Trade Event Stand</p>
       </footer>
     </div>
   );

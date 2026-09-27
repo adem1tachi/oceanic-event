@@ -2,8 +2,12 @@ import { setRequestLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { ProjectorMode } from "@/components/admin/ProjectorMode";
-import type { WinnerItem } from "@/components/admin/RaffleManager";
+import {
+  ProjectorMode,
+  type ProjectorWinner,
+  type ProjectorParticipant,
+  type LeadingTopicInfo,
+} from "@/components/admin/ProjectorMode";
 
 export const dynamic = "force-dynamic";
 
@@ -36,13 +40,18 @@ export default async function ProjectorPage({
     return null;
   }
 
-  let winners: WinnerItem[] = [];
-  let leadingTopicSlug = "topic-a";
+  let winners: ProjectorWinner[] = [];
+  let allParticipants: ProjectorParticipant[] = [];
+  let leadingTopic: LeadingTopicInfo = {
+    slug: "topic-a",
+    title: "Winning Training Topic",
+    votesCount: 0,
+  };
 
   try {
     const adminSupabase = createAdminClient();
 
-    // Query leading topic
+    // 1. Query leading topic from vote_counts
     const { data: countsData } = await adminSupabase
       .from("vote_counts")
       .select("topic_slug, count")
@@ -50,10 +59,43 @@ export default async function ProjectorPage({
       .limit(1);
 
     if (countsData && countsData.length > 0) {
-      leadingTopicSlug = countsData[0].topic_slug;
+      const topSlug = countsData[0].topic_slug;
+      const count = Number(countsData[0].count) || 0;
+
+      const { data: topicData } = await adminSupabase
+        .from("topics")
+        .select("title")
+        .eq("slug", topSlug)
+        .maybeSingle();
+
+      leadingTopic = {
+        slug: topSlug,
+        title: topicData?.title || topSlug,
+        votesCount: count,
+      };
     }
 
-    // Query all winners
+    // 2. Query all participants
+    const { data: participantsData } = await adminSupabase
+      .from("participants")
+      .select("id, full_name, first_name, last_name, company, position, phone, email, desired_topic")
+      .order("created_at", { ascending: false });
+
+    if (participantsData) {
+      allParticipants = participantsData.map((p: any) => ({
+        id: p.id,
+        full_name: p.full_name,
+        first_name: p.first_name,
+        last_name: p.last_name,
+        company: p.company,
+        position: p.position,
+        phone: p.phone,
+        email: p.email,
+        desired_topic: p.desired_topic,
+      }));
+    }
+
+    // 3. Query all winners joined with participants
     const { data: winnersData } = await adminSupabase
       .from("winners")
       .select(`
@@ -63,24 +105,34 @@ export default async function ProjectorPage({
         drawn_at,
         participants (
           full_name,
+          first_name,
+          last_name,
           phone,
-          email,
-          locale
+          company,
+          position
         )
       `)
       .order("drawn_at", { ascending: false });
 
     if (winnersData) {
-      winners = winnersData.map((w: any) => ({
-        id: w.id,
-        participant_id: w.participant_id,
-        draw_round: w.draw_round,
-        drawn_at: w.drawn_at,
-        full_name: w.participants?.full_name || "Anonymous",
-        phone: w.participants?.phone || "",
-        email: w.participants?.email || null,
-        locale: w.participants?.locale || "en",
-      }));
+      winners = winnersData.map((w: any) => {
+        const p = w.participants;
+        const name =
+          p?.full_name ||
+          (p?.first_name || p?.last_name
+            ? `${p.first_name || ""} ${p.last_name || ""}`.trim()
+            : "Participant");
+        return {
+          id: w.id,
+          participantId: w.participant_id,
+          name,
+          phone: p?.phone || "",
+          company: p?.company || "",
+          position: p?.position || "",
+          drawRound: w.draw_round || 1,
+          drawnAt: w.drawn_at,
+        };
+      });
     }
   } catch (err) {
     console.error("[Projector Page] Error loading projector data:", err);
@@ -88,8 +140,9 @@ export default async function ProjectorPage({
 
   return (
     <ProjectorMode
-      winners={winners}
-      leadingTopicSlug={leadingTopicSlug}
+      initialWinners={winners}
+      allParticipants={allParticipants}
+      leadingTopic={leadingTopic}
     />
   );
 }

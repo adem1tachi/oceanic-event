@@ -39,6 +39,20 @@ const config: Config = {
           error: "var(--color-error)",
           "error-subtle": "var(--color-error-subtle)",
         },
+        brand: {
+          navy: {
+            DEFAULT: "#0A1124",
+            dark: "#0A1124",
+            slate: "#12223B",
+            petrol: "#0E3B4F",
+          },
+          orange: {
+            DEFAULT: "#E88607",
+            rust: "#B5500C",
+            amber: "#CD6E10",
+            gold: "#E88607",
+          },
+        },
       },
       borderRadius: {
         sm: "var(--radius-sm)",
@@ -49,6 +63,7 @@ const config: Config = {
       },
       fontFamily: {
         sans: [
+          "var(--font-cairo)",
           "var(--font-sans)",
           "system-ui",
           "-apple-system",
@@ -59,6 +74,7 @@ const config: Config = {
           "Arial",
           "sans-serif",
         ],
+        cairo: ["var(--font-cairo)", "sans-serif"],
       },
     },
   },

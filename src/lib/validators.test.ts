@@ -158,3 +158,33 @@ describe("Admin Login Schema Validation", () => {
     expect(res.success).toBe(false);
   });
 });
+
+describe("Visitor Specific Registration Fields", () => {
+  it("passes with valid visitor fields", () => {
+    const res = registrationSchema.safeParse({
+      firstName: "Adem",
+      lastName: "Tachi",
+      position: "IT Manager",
+      company: "Sonatrach",
+      whatsapp: "0550123456",
+      desiredTopic: "Applied AI",
+      peopleCount: 3,
+      consent: true,
+      locale: "ar",
+    });
+    expect(res.success).toBe(true);
+  });
+
+  it("fails if position or company is missing for visitor registration", () => {
+    const res = registrationSchema.safeParse({
+      firstName: "Adem",
+      lastName: "Tachi",
+      position: "",
+      company: "Sonatrach",
+      whatsapp: "0550123456",
+      consent: true,
+    });
+    expect(res.success).toBe(false);
+  });
+});
+

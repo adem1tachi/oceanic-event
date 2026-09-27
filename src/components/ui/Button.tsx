@@ -24,23 +24,23 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ) => {
     // Base styles using logical properties and tokens
     const baseStyles =
-      "inline-flex items-center justify-center font-medium rounded-md transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-highlight disabled:opacity-50 disabled:cursor-not-allowed select-none active:scale-[0.99]";
+      "inline-flex items-center justify-center font-bold rounded-xl transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-navy-petrol disabled:opacity-50 disabled:cursor-not-allowed select-none active:scale-[0.99]";
 
     const sizeStyles = {
-      sm: "text-xs px-3 py-1.5 min-h-[36px]",
-      md: "text-sm px-4 py-2.5 min-h-[44px]", // 44px min touch target for mobile
-      lg: "text-base px-6 py-3.5 min-h-[52px]", // Prominent touch target for primary CTAs
+      sm: "text-xs px-3.5 py-2 min-h-[38px]",
+      md: "text-sm px-5 py-2.5 min-h-[44px]", // 44px min touch target for mobile
+      lg: "text-base px-6 py-3.5 min-h-[50px]", // Prominent touch target for primary CTAs
     };
 
     const variantStyles = {
       primary:
-        "bg-action text-action-fg hover:bg-action-hover border border-transparent shadow-sm",
+        "bg-brand-navy-dark text-white hover:bg-brand-navy-slate shadow-sm",
       secondary:
-        "bg-bg-surface-raised text-token-primary hover:bg-border border border-border",
+        "bg-slate-100 text-brand-navy-dark hover:bg-slate-200",
       outline:
-        "bg-transparent text-token-primary border border-border-strong hover:bg-bg-surface-raised",
+        "bg-white text-brand-navy-dark ring-1 ring-slate-900/10 hover:ring-slate-900/20 hover:bg-slate-50",
       danger:
-        "bg-feedback-error text-white hover:opacity-90 border border-transparent",
+        "bg-rose-600 text-white hover:bg-rose-700 shadow-sm",
     };
 
     return (

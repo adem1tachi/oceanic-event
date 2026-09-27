@@ -2,10 +2,7 @@ import { setRequestLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { AdminHeader } from "@/components/admin/AdminHeader";
-import { ResultsOverview } from "@/components/admin/ResultsOverview";
-import { ParticipantsTable, type ParticipantItem } from "@/components/admin/ParticipantsTable";
-import { RaffleManager, type WinnerItem } from "@/components/admin/RaffleManager";
+import { AdminDashboardClient } from "@/components/admin/AdminDashboardClient";
 import type { VoteData } from "@/components/VotingSection";
 
 export const dynamic = "force-dynamic";
@@ -42,11 +39,38 @@ export default async function AdminDashboardPage({
 
   // 2. Load Dashboard Data via Privileged Admin Client
   let voteResults: VoteData[] = [];
-  let participants: ParticipantItem[] = [];
-  let winners: WinnerItem[] = [];
+  let participants: any[] = [];
+  let winners: any[] = [];
+  let settings: any = { isRegistrationOpen: true, eventDate: undefined, topics: [] };
 
   try {
     const adminSupabase = createAdminClient();
+
+    // Query Settings
+    const { data: settingsData } = await adminSupabase
+      .from("app_settings")
+      .select("*")
+      .eq("id", 1)
+      .single();
+
+    const { data: topicsData } = await adminSupabase
+      .from("topics")
+      .select("id, slug, position, title, description, image_url")
+      .order("position", { ascending: true });
+
+    settings = {
+      isRegistrationOpen: settingsData?.is_registration_open ?? true,
+      eventDate: settingsData?.event_date || undefined,
+      contactStatuses: (settingsData?.contact_statuses as Record<string, "new" | "contacted" | "winner">) || {},
+      topics: topicsData?.map((t) => ({
+        id: t.id,
+        slug: t.slug,
+        position: t.position,
+        title: t.title || "",
+        description: t.description || "",
+        imageUrl: t.image_url || "",
+      })) || [],
+    };
 
     // Query vote counts
     const { data: countsData } = await adminSupabase
@@ -66,7 +90,7 @@ export default async function AdminDashboardPage({
     // Query participants
     const { data: participantsData } = await adminSupabase
       .from("participants")
-      .select("id, full_name, phone, email, locale, created_at")
+      .select("*")
       .order("created_at", { ascending: false });
 
     if (participantsData) {
@@ -107,32 +131,12 @@ export default async function AdminDashboardPage({
   }
 
   return (
-    <div className="min-h-screen bg-bg flex flex-col">
-      <AdminHeader adminEmail={user.email} />
-
-      <main className="flex-1 max-w-6xl mx-auto w-full px-4 py-8 flex flex-col gap-8">
-        {/* Results & Leading Course Section */}
-        <section aria-label="Results and Course Selection">
-          <ResultsOverview results={voteResults} />
-        </section>
-
-        {/* End of Day Raffle Draw Manager */}
-        <section aria-label="Raffle Draw Manager">
-          <RaffleManager
-            initialWinners={winners}
-            totalParticipants={participants.length}
-          />
-        </section>
-
-        {/* Registered Participants Table with CSV Export */}
-        <section aria-label="Participants List">
-          <ParticipantsTable participants={participants} />
-        </section>
-      </main>
-
-      <footer className="border-t border-border bg-bg-surface py-4 text-center text-xs text-token-muted">
-        <p>Forma Tak 2026 • Administrative Management Portal</p>
-      </footer>
-    </div>
+    <AdminDashboardClient
+      adminEmail={user.email ?? null}
+      initialVoteResults={voteResults}
+      initialParticipants={participants}
+      initialWinners={winners}
+      initialSettings={settings}
+    />
   );
 }
