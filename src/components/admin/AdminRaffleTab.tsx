@@ -1,11 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef, useMemo } from "react";
+import { Link } from "@/i18n/navigation";
 import {
   Trophy,
   Sparkles,
-  Maximize2,
-  Minimize2,
   RefreshCcw,
   CheckCircle2,
   AlertCircle,
@@ -138,7 +137,6 @@ export function AdminRaffleTab({
     }));
   });
 
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const [isDrawing, setIsDrawing] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
@@ -212,22 +210,6 @@ export function AdminRaffleTab({
       }
     };
   }, []);
-
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
-  }, []);
-
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(() => {});
-    } else {
-      document.exitFullscreen().catch(() => {});
-    }
-  };
 
   const handleDrawOne = () => {
     if (eligibleParticipants.length === 0) {
@@ -476,20 +458,8 @@ export function AdminRaffleTab({
     }
   };
 
-  const openProjectorScreen = async () => {
-    try {
-      if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
-        await document.documentElement.requestFullscreen();
-      }
-    } catch {}
-
-    const isArabic = typeof window !== "undefined" && window.location.pathname.startsWith("/ar");
-    const targetUrl = isArabic ? "/ar/admin/projector" : "/en/admin/projector";
-    window.location.href = targetUrl;
-  };
-
   return (
-    <div className={`space-y-6 text-left ${isFullscreen ? "bg-slate-50 text-slate-900 min-h-screen p-6 sm:p-10" : ""}`}>
+    <div className="space-y-6 text-left">
       {/* Top Header & Actions Toolbar */}
       <div className="flex items-center justify-between gap-4">
         <div>
@@ -499,16 +469,17 @@ export function AdminRaffleTab({
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Projector Screen Button */}
-          <button
-            type="button"
-            onClick={openProjectorScreen}
+          {/* Projector Mode Button (Direct link for big screen presentation) */}
+          <Link
+            href="/admin/projector"
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white text-xs font-semibold transition-colors shadow-2xs"
-            title="Open Presentation Screen for Big Screen / Projector"
+            title="Open Projector Mode"
           >
             <Tv className="w-3.5 h-3.5" />
-            <span>شاشة العرض (Projector)</span>
-          </button>
+            <span>Projector Mode</span>
+          </Link>
 
           {/* Sound Toggle Button */}
           <button
@@ -526,26 +497,6 @@ export function AdminRaffleTab({
               <>
                 <VolumeX className="w-3.5 h-3.5 text-slate-400" />
                 <span className="hidden sm:inline">Muted</span>
-              </>
-            )}
-          </button>
-
-          {/* Fullscreen Button */}
-          <button
-            type="button"
-            onClick={toggleFullscreen}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-medium transition-colors shadow-2xs"
-            title="Toggle Fullscreen"
-          >
-            {isFullscreen ? (
-              <>
-                <Minimize2 className="w-3.5 h-3.5 text-slate-600" />
-                <span>Exit Fullscreen</span>
-              </>
-            ) : (
-              <>
-                <Maximize2 className="w-3.5 h-3.5 text-slate-600" />
-                <span>Fullscreen</span>
               </>
             )}
           </button>
