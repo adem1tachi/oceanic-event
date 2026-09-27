@@ -1,7 +1,6 @@
 {
   "name": "formatech",
   "version": "1.0.0",
-  "main": "index.js",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -18,13 +17,11 @@
   "dependencies": {
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.48.1",
-    "clsx": "^2.1.1",
     "lucide-react": "^1.48.0",
     "next": "^14.2.23",
     "next-intl": "^3.26.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "tailwind-merge": "^3.7.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
