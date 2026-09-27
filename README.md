@@ -340,3 +340,4 @@ Follow these steps to verify every user flow, edge case, and administrative feat
 - [ ] From `/en/admin`, tap **"Launch Projector Screen"** (or visit `/en/admin/projector`).
 - [ ] **Verification**: A dark, high-contrast display loads showcasing the grand prize badge, winning topic title, and winner cards.
 - [ ] Tap individual cards or tap **"Reveal All"** -> Winner cards flip/reveal with smooth animations and phone numbers are safely masked (e.g., `0550 •• •• 56`).
+# oceanic-event
