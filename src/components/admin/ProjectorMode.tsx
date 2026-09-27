@@ -7,8 +7,6 @@ import {
   Trophy,
   Sparkles,
   ArrowLeft,
-  Maximize2,
-  Minimize2,
   RefreshCcw,
   Volume2,
   VolumeX,
@@ -17,9 +15,6 @@ import {
   CheckCircle2,
   AlertCircle,
   X,
-  Eye,
-  EyeOff,
-  Medal,
 } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { FormaTechLogo } from "@/components/FormaTechLogo";
@@ -191,7 +186,6 @@ export function ProjectorMode({
   leadingTopic,
 }: ProjectorModeProps) {
   const [winners, setWinners] = useState<ProjectorWinner[]>(initialWinners);
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const [isDrawing, setIsDrawing] = useState(false);
   const [isLeverPulling, setIsLeverPulling] = useState(false);
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
@@ -200,11 +194,6 @@ export function ProjectorMode({
   const [showCelebrationModal, setShowCelebrationModal] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [feedback, setFeedback] = useState<{ message: string; type: "success" | "error" | "warning" } | null>(null);
-
-  // Auto-hiding header toolbar controls
-  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
-  const [isAutoHideEnabled, setIsAutoHideEnabled] = useState(true);
-  const idleTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Wheel animation states
   const [wheelRotation, setWheelRotation] = useState(0);
@@ -229,81 +218,6 @@ export function ProjectorMode({
       audioRef.current.enabled = soundEnabled;
     }
   }, [soundEnabled]);
-
-  // Fullscreen listeners & auto-enter
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-
-    // Attempt immediate fullscreen upon mount
-    if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
-      document.documentElement.requestFullscreen().catch(() => {});
-    }
-
-    // Auto-enter fullscreen upon first user gesture if browser blocked initial call
-    const tryAutoFullscreen = () => {
-      if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
-        document.documentElement.requestFullscreen().catch(() => {});
-      }
-    };
-    window.addEventListener("click", tryAutoFullscreen, { once: true });
-    window.addEventListener("keydown", tryAutoFullscreen, { once: true });
-
-    return () => {
-      document.removeEventListener("fullscreenchange", handleFullscreenChange);
-      window.removeEventListener("click", tryAutoFullscreen);
-      window.removeEventListener("keydown", tryAutoFullscreen);
-    };
-  }, []);
-
-  const toggleFullscreen = useCallback(() => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(() => {});
-    } else {
-      document.exitFullscreen().catch(() => {});
-    }
-  }, []);
-
-  // Auto-hide toolbar idle timer
-  const resetIdleTimer = useCallback(() => {
-    setIsHeaderVisible(true);
-    if (idleTimerRef.current) {
-      clearTimeout(idleTimerRef.current);
-    }
-    if (!isAutoHideEnabled) return;
-    idleTimerRef.current = setTimeout(() => {
-      // Don't auto-hide if a modal is open or spin is running
-      if (!showCelebrationModal && !isResetModalOpen) {
-        setIsHeaderVisible(false);
-      }
-    }, 3500);
-  }, [isAutoHideEnabled, showCelebrationModal, isResetModalOpen]);
-
-  useEffect(() => {
-    const handleActivity = (e: MouseEvent | KeyboardEvent | TouchEvent) => {
-      if ("clientY" in e && e.clientY < 75) {
-        setIsHeaderVisible(true);
-        if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
-        return;
-      }
-      resetIdleTimer();
-    };
-
-    window.addEventListener("mousemove", handleActivity);
-    window.addEventListener("keydown", handleActivity);
-    window.addEventListener("touchstart", handleActivity);
-
-    resetIdleTimer();
-
-    return () => {
-      window.removeEventListener("mousemove", handleActivity);
-      window.removeEventListener("keydown", handleActivity);
-      window.removeEventListener("touchstart", handleActivity);
-      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
-    };
-  }, [resetIdleTimer]);
 
   // Winner participant IDs
   const winnerParticipantIds = useMemo(
@@ -734,7 +648,11 @@ export function ProjectorMode({
         }
       } else if (e.key === "f" || e.key === "F") {
         if (!showCelebrationModal && !isResetModalOpen) {
-          toggleFullscreen();
+          if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(() => {});
+          } else {
+            document.exitFullscreen().catch(() => {});
+          }
         }
       } else if (e.key === "m" || e.key === "M") {
         if (!showCelebrationModal && !isResetModalOpen) {
@@ -747,7 +665,7 @@ export function ProjectorMode({
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [showCelebrationModal, isResetModalOpen, handlePullLever, toggleFullscreen]);
+  }, [showCelebrationModal, isResetModalOpen, handlePullLever]);
 
   // Reset the draw directly from the stage
   const handleResetDraw = async () => {
@@ -815,69 +733,52 @@ export function ProjectorMode({
       <div className="absolute bottom-0 right-0 w-[550px] h-[450px] bg-[#E88607]/5 blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-[550px] h-[450px] bg-[#0E3B4F]/15 blur-3xl pointer-events-none" />
 
-      {/* Invisible Top Hover Trigger Bar to reveal header on mouse move */}
-      <div
-        onMouseEnter={() => setIsHeaderVisible(true)}
-        className="fixed top-0 inset-x-0 h-4 z-40 pointer-events-auto"
-        aria-hidden="true"
-      />
-
-      {/* TOP HEADER & STAGE TOOLBAR (Auto-hiding on idle) */}
-      <header
-        className={`fixed top-0 inset-x-0 z-40 px-4 sm:px-8 py-3 bg-[#0A1124]/90 backdrop-blur-md border-b border-[rgba(234,240,246,0.12)] transition-all duration-300 transform ${
-          isHeaderVisible
-            ? "translate-y-0 opacity-100"
-            : "-translate-y-full opacity-0 pointer-events-none"
-        }`}
-      >
+      {/* TOP HEADER - PERMANENTLY VISIBLE WITH CLEAR OCEANIC & FORMATECH LOGOS */}
+      <header className="w-full border-b border-[rgba(234,240,246,0.12)] bg-[#0A1124]/95 backdrop-blur-md z-40 px-4 sm:px-8 py-3 shadow-md shrink-0">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-          {/* Left Side: Exit Button & Stage Indicator */}
+          {/* Right Side (Start in RTL): Return Button & Live Stage Indicator */}
           <div className="flex items-center gap-3">
             <Link
               href="/admin"
               className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#12223B] border border-[rgba(234,240,246,0.12)] text-[#9FB1C6] hover:text-white hover:bg-[#0E3B4F] text-xs font-semibold transition-colors"
             >
               <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
-              <span>العودة للوحة الإدارة</span>
+              <span className="hidden sm:inline">العودة للوحة الإدارة</span>
+              <span className="sm:hidden">رجوع</span>
             </Link>
 
             <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-[#12223B]/80 border border-emerald-500/40 text-emerald-400 text-xs font-bold shadow-[0_0_15px_rgba(16,185,129,0.2)]">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-              <span>بث مباشر للشاشة (Live Stage)</span>
+              <span className="hidden md:inline">بث مباشر للشاشة (Live Stage)</span>
+              <span className="md:hidden">مباشر</span>
             </div>
           </div>
 
-          {/* Center Brand Identity (Dual Logos) */}
-          <div className="hidden md:flex items-center gap-3">
-            <Image
-              src="/logo-oceanic.png"
-              alt="OCEANIC"
-              width={96}
-              height={36}
-              priority
-              className="h-6 sm:h-7 w-auto object-contain brightness-0 invert drop-shadow-[0_2px_8px_rgba(255,255,255,0.15)]"
-            />
-            <div className="h-4 w-px bg-white/20" />
-            <FormaTechLogo className="h-5 sm:h-6 w-auto text-[#EAF0F6]" />
+          {/* Center Branding: Dual Logos ALWAYS CLEARLY VISIBLE on all screens */}
+          <div className="flex items-center gap-3 sm:gap-4 shrink-0">
+            {/* OCEANIC Crisp White Logo */}
+            <div className="relative flex items-center justify-center h-8 sm:h-9 w-24 sm:w-28 shrink-0">
+              <Image
+                src="/logo-oceanic.png"
+                alt="OCEANIC"
+                width={112}
+                height={40}
+                priority
+                className="object-contain max-h-full max-w-full brightness-0 invert drop-shadow-[0_2px_10px_rgba(255,255,255,0.25)]"
+              />
+            </div>
+
+            {/* Elegant Divider */}
+            <div className="h-5 sm:h-6 w-px bg-white/20 shrink-0" aria-hidden="true" />
+
+            {/* FormaTech Expo Logo */}
+            <div className="flex items-center justify-center shrink-0">
+              <FormaTechLogo className="h-6 sm:h-7 w-auto text-[#EAF0F6]" />
+            </div>
           </div>
 
-          {/* Right Side Controls: AutoHide, Sound, Reset, Fullscreen */}
+          {/* Left Side (End in RTL): Controls (Sound, Reset - Clean & Minimal) */}
           <div className="flex items-center gap-2">
-            {/* Auto-Hide Lock Toggle */}
-            <button
-              type="button"
-              onClick={() => setIsAutoHideEnabled((prev) => !prev)}
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-colors cursor-pointer ${
-                isAutoHideEnabled
-                  ? "bg-[#12223B] border-white/10 text-[#9FB1C6] hover:text-white hover:bg-[#0E3B4F]"
-                  : "bg-[#E88607]/20 border-[#E88607]/40 text-[#E88607]"
-              }`}
-              title={isAutoHideEnabled ? "إيقاف الإخفاء التلقائي للشريط" : "تفعيل الإخفاء التلقائي للشريط"}
-            >
-              {isAutoHideEnabled ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-              <span className="hidden xl:inline">{isAutoHideEnabled ? "إخفاء تلقائي" : "شريط مثبت"}</span>
-            </button>
-
             {/* Sound Toggle */}
             <button
               type="button"
@@ -909,33 +810,13 @@ export function ProjectorMode({
                 <span className="hidden sm:inline">إعادة ضبط</span>
               </button>
             )}
-
-            {/* Fullscreen Button */}
-            <button
-              type="button"
-              onClick={toggleFullscreen}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#E88607]/15 border border-[#E88607]/40 text-[#E88607] hover:bg-[#E88607]/25 text-xs font-bold transition-colors cursor-pointer"
-              title="تبديل ملء الشاشة (F)"
-            >
-              {isFullscreen ? (
-                <>
-                  <Minimize2 className="w-4 h-4" />
-                  <span className="hidden sm:inline">تصغير</span>
-                </>
-              ) : (
-                <>
-                  <Maximize2 className="w-4 h-4" />
-                  <span className="hidden sm:inline">ملء الشاشة</span>
-                </>
-              )}
-            </button>
           </div>
         </div>
       </header>
 
       {/* Feedback Alert */}
       {feedback && (
-        <div className="max-w-4xl mx-auto mt-16 px-4 w-full z-40">
+        <div className="max-w-4xl mx-auto mt-2 px-4 w-full z-40">
           <div
             className={`p-3 rounded-xl text-xs font-bold flex items-center justify-between gap-2 shadow-md ${
               feedback.type === "success"
@@ -963,8 +844,8 @@ export function ProjectorMode({
         </div>
       )}
 
-      {/* MAIN STAGE CONTENT (Balanced for 1080p, 4K, and Large Displays) */}
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12 flex flex-col justify-between gap-4 z-10">
+      {/* MAIN STAGE CONTENT */}
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex flex-col justify-between gap-4 z-10">
         
         {/* 1. WINNING TOPIC HERO BANNER */}
         <section
@@ -976,9 +857,9 @@ export function ProjectorMode({
 
           <div className="relative flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-right">
             <div className="flex items-center gap-4">
-              <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-[#E88607] to-[#CD6E10] p-0.5 shadow-lg shadow-[#E88607]/20 shrink-0 flex items-center justify-center">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-[#E88607] to-[#CD6E10] p-0.5 shadow-lg shadow-[#E88607]/20 shrink-0 flex items-center justify-center">
                 <div className="w-full h-full bg-[#0A1124] rounded-[14px] flex items-center justify-center">
-                  <Trophy className="w-7 h-7 text-[#E88607] animate-pulse" />
+                  <Trophy className="w-6 h-6 sm:w-7 sm:h-7 text-[#E88607] animate-pulse" />
                 </div>
               </div>
 
@@ -1006,240 +887,242 @@ export function ProjectorMode({
           </div>
         </section>
 
-        {/* 2. THE STAGE SPLIT: HALF-WHEEL WITH LEVER (8 COLS) & WINNERS BOARD (4 COLS) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-center my-auto w-full">
+        {/* 2. THE STAGE: LEVER (FAR RIGHT), FULL WHEEL (CENTER), WINNERS BOARD (LEFT) */}
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-6 lg:gap-8 w-full my-auto">
           
-          {/* LEFT: THE SUSPENSE HALF-WHEEL DOME & MECHANICAL LEVER (8 COLS) */}
-          <div className="lg:col-span-8 flex flex-col items-center justify-center">
+          {/* [1] FAR RIGHT (أقصى اليمين): MECHANICAL LEVER ASSEMBLY */}
+          <div className="order-2 lg:order-1 flex flex-col items-center justify-center shrink-0 w-28 sm:w-32">
+            {/* Pull Guidance Indicator */}
+            <div
+              className={`text-center mb-2 transition-opacity duration-300 ${
+                isDrawing ? "opacity-30" : "opacity-100 animate-bounce"
+              }`}
+            >
+              <span className="text-[11px] font-black text-[#E88607] block tracking-wider uppercase">
+                اسحب العتلة
+              </span>
+              <ChevronDown className="w-5 h-5 text-[#E88607] mx-auto -mt-1" />
+            </div>
+
+            {/* The Physical Lever Arm Assembly */}
+            <div
+              role="button"
+              tabIndex={0}
+              aria-label="اسحب العتلة لتدوير العجلة"
+              aria-disabled={isDrawing || eligibleParticipants.length === 0}
+              onClick={handlePullLever}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  handlePullLever();
+                }
+              }}
+              className={`group relative flex flex-col items-center select-none cursor-pointer focus:outline-none ${
+                isDrawing || eligibleParticipants.length === 0
+                  ? "opacity-50 cursor-not-allowed pointer-events-none"
+                  : "cursor-pointer"
+              }`}
+            >
+              {/* Lever Arm (Shaft & Grip Knob) that rotates when pulled */}
+              <div
+                className="flex flex-col items-center will-change-transform transition-transform duration-300 ease-out origin-bottom"
+                style={{
+                  transform: isLeverPulling
+                    ? "rotate(52deg) translateY(24px) scaleY(0.92)"
+                    : "rotate(0deg)",
+                  transformOrigin: "center 210px",
+                }}
+              >
+                {/* 3D Glossy Grip Knob in Oceanic Rust / Amber */}
+                <div className="relative w-14 h-14 rounded-full bg-gradient-to-br from-[#E88607] via-[#CD6E10] to-[#B5500C] p-1 shadow-2xl group-hover:scale-105 group-hover:shadow-[0_0_30px_rgba(232,134,7,0.7)] transition-all">
+                  {/* Specular Highlight on Knob */}
+                  <div className="w-4 h-4 rounded-full bg-white/70 blur-[1px] absolute top-2 right-2.5" />
+                  <div className="w-full h-full rounded-full border border-white/30 flex items-center justify-center">
+                    <Sparkles className="w-5 h-5 text-white/95 drop-shadow-md" />
+                  </div>
+                </div>
+
+                {/* Chromed Metallic Shaft */}
+                <div className="w-4 h-36 sm:h-40 bg-gradient-to-r from-slate-400 via-slate-100 to-slate-500 rounded-b-md shadow-lg border-x border-slate-400 relative">
+                  <div className="absolute inset-y-0 left-1 w-1 bg-white/80" />
+                </div>
+              </div>
+
+              {/* Heavy Steel Pivot Housing & Base */}
+              <div className="w-16 h-14 -mt-2 rounded-2xl bg-gradient-to-b from-[#12223B] via-[#0A1124] to-black border-2 border-[rgba(234,240,246,0.18)] shadow-2xl flex flex-col items-center justify-center relative z-10">
+                {/* Metallic Pivot Pin */}
+                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#FDE68A] via-[#E88607] to-[#CD6E10] border border-amber-200 shadow-inner flex items-center justify-center">
+                  <div className="w-2 h-2 rounded-full bg-[#0A1124]" />
+                </div>
+
+                {/* Status Indicator LED */}
+                <div className="flex items-center gap-1 mt-1">
+                  <span
+                    className={`w-2 h-2 rounded-full ${
+                      isDrawing
+                        ? "bg-red-500 animate-ping"
+                        : eligibleParticipants.length === 0
+                        ? "bg-slate-500"
+                        : "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]"
+                    }`}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Lever Base Subtitle */}
+            <span className="text-[10px] font-mono text-[#9FB1C6] mt-2 font-bold tracking-widest uppercase">
+              PULL [SPACE]
+            </span>
+          </div>
+
+          {/* [2] CENTER (الوسط): FULL CIRCULAR PRIZE WHEEL (NO BOX, NO CLIPPING) */}
+          <div className="order-1 lg:order-2 flex-1 flex flex-col items-center justify-center select-none py-2">
             
-            <div className="flex items-end justify-center gap-4 sm:gap-8 w-full max-w-3xl">
+            {/* The Wheel Housing Circle with Natural Circular Glow (NO RECTANGULAR BOX!) */}
+            <div className="relative w-[320px] sm:w-[380px] lg:w-[410px] h-[320px] sm:h-[380px] lg:h-[410px] flex items-center justify-center">
               
-              {/* THE HALF-WHEEL DOME CONTAINER (TOP-HALF ONLY) */}
-              <div className="relative w-full max-w-[540px] sm:max-w-[620px] lg:max-w-[680px] h-[270px] sm:h-[310px] lg:h-[345px] overflow-hidden flex justify-center items-start pt-3 select-none">
-                
-                {/* Top Center Spring-Loaded Mechanical Pointer (Flipper) */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center pointer-events-none">
-                  <div
-                    ref={pointerRef}
-                    className="flex flex-col items-center will-change-transform drop-shadow-xl"
-                    style={{ transformOrigin: "top center" }}
-                  >
-                    {/* Metallic Pivot Hub */}
-                    <div className="w-6 h-6 rounded-full bg-[#0A1124] border-2 border-[#E88607] shadow-xl flex items-center justify-center -mb-1 z-10">
-                      <div className="w-2 h-2 rounded-full bg-[#FDE68A] shadow-xs" />
-                    </div>
-                    {/* Needle Blade in High-Visibility Red */}
-                    <div className="w-0 h-0 border-l-[14px] border-l-transparent border-r-[14px] border-r-transparent border-t-[32px] border-t-red-600 drop-shadow-2xl" />
-                  </div>
-                </div>
+              {/* Natural Circular Ambient Glow (360° unclipped) */}
+              <div
+                className={`absolute inset-0 rounded-full transition-all duration-700 pointer-events-none ${
+                  isDrawing
+                    ? "bg-[#E88607]/25 blur-3xl scale-110"
+                    : "bg-[#0E3B4F]/20 blur-2xl scale-100"
+                }`}
+              />
 
-                {/* Massive Stationary Outer Glowing Frame (Holds full circle, bottom half clipped by container) */}
+              {/* Top Center Spring-Loaded Mechanical Pointer (Flipper at 12 o'clock) */}
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center pointer-events-none">
                 <div
-                  className={`relative w-[540px] sm:w-[620px] lg:w-[680px] h-[540px] sm:h-[620px] lg:h-[680px] shrink-0 rounded-full border-4 sm:border-8 border-[#12223B] ring-4 overflow-hidden isolate transition-all duration-500 ${
-                    isDrawing
-                      ? "ring-[#E88607]/80 shadow-[0_0_80px_rgba(232,134,7,0.4)]"
-                      : "ring-[#0E3B4F]/60 shadow-[0_0_45px_rgba(10,17,36,0.8)]"
-                  }`}
+                  ref={pointerRef}
+                  className="flex flex-col items-center will-change-transform drop-shadow-xl"
+                  style={{ transformOrigin: "top center" }}
                 >
-                  {/* Rotating Graphic Wheel Disk */}
-                  <div
-                    ref={wheelDiskRef}
-                    className="w-full h-full rounded-full will-change-transform"
-                    style={{
-                      transform: `rotate(${wheelRotation}deg)`,
-                    }}
-                  >
-                    <svg viewBox="0 0 400 400" className="w-full h-full block">
-                      <circle cx="200" cy="200" r="195" fill="#0A1124" stroke="#0E3B4F" strokeWidth="2.5" />
-                      <g transform="translate(200, 200)">
-                        {Array.from({ length: WHEEL_SEGMENTS_COUNT }).map((_, index) => {
-                          const sliceAngle = 360 / WHEEL_SEGMENTS_COUNT; // 45°
-                          const baseStartAngle = 270 - sliceAngle / 2; // 247.5°
-                          const startAngleDeg = baseStartAngle + index * sliceAngle;
-                          const endAngleDeg = startAngleDeg + sliceAngle;
-                          const midAngleDeg = startAngleDeg + sliceAngle / 2;
-
-                          const startAngleRad = (startAngleDeg * Math.PI) / 180;
-                          const endAngleRad = (endAngleDeg * Math.PI) / 180;
-                          const x1 = 195 * Math.cos(startAngleRad);
-                          const y1 = 195 * Math.sin(startAngleRad);
-                          const x2 = 195 * Math.cos(endAngleRad);
-                          const y2 = 195 * Math.sin(endAngleRad);
-
-                          const slotName = displayedNames[index] || "—";
-                          const color = SLICE_COLORS[index % SLICE_COLORS.length];
-
-                          return (
-                            <g key={index}>
-                              <path
-                                d={`M 0 0 L ${x1} ${y1} A 195 195 0 0 1 ${x2} ${y2} Z`}
-                                fill={color}
-                                stroke="rgba(234, 240, 246, 0.2)"
-                                strokeWidth="2"
-                              />
-                              <g transform={`rotate(${midAngleDeg}) translate(115, 0)`}>
-                                <text
-                                  x="0"
-                                  y="0"
-                                  fill="#EAF0F6"
-                                  fontSize="11.5"
-                                  fontWeight="800"
-                                  textAnchor="middle"
-                                  dominantBaseline="central"
-                                  className="font-sans select-none tracking-tight"
-                                >
-                                  {slotName.length > 15 ? slotName.slice(0, 14) + "…" : slotName}
-                                </text>
-                              </g>
-                            </g>
-                          );
-                        })}
-
-                        {/* 3D Golden Mechanical Pegs on Rim between each slice */}
-                        {Array.from({ length: WHEEL_SEGMENTS_COUNT }).map((_, index) => {
-                          const sliceAngle = 360 / WHEEL_SEGMENTS_COUNT; // 45°
-                          const baseStartAngle = 270 - sliceAngle / 2; // 247.5°
-                          const pegAngleDeg = baseStartAngle + index * sliceAngle;
-                          const pegRad = (pegAngleDeg * Math.PI) / 180;
-                          const px = 186 * Math.cos(pegRad);
-                          const py = 186 * Math.sin(pegRad);
-
-                          return (
-                            <g key={`peg-${index}`}>
-                              <circle cx={px} cy={py + 1.2} r="5" fill="#000000" opacity="0.6" />
-                              <circle cx={px} cy={py} r="4.5" fill="#CD6E10" />
-                              <circle cx={px - 0.8} cy={py - 0.8} r="2.8" fill="#FDE68A" />
-                              <circle cx={px - 1.2} cy={py - 1.2} r="1.2" fill="#FFFFFF" />
-                            </g>
-                          );
-                        })}
-                      </g>
-
-                      {/* Inner Center Hub (sits on the horizon of the half-dome) */}
-                      <circle cx="200" cy="200" r="48" fill="#0A1124" stroke="#E88607" strokeWidth="3" />
-                      <circle cx="200" cy="200" r="42" fill="#12223B" />
-                      <text
-                        x="200"
-                        y="197"
-                        fill="#FFFFFF"
-                        fontSize="10"
-                        fontWeight="900"
-                        textAnchor="middle"
-                        className="font-mono tracking-widest uppercase"
-                      >
-                        OCEANIC
-                      </text>
-                      <text
-                        x="200"
-                        y="211"
-                        fill="#E88607"
-                        fontSize="8.5"
-                        fontWeight="bold"
-                        textAnchor="middle"
-                        className="font-sans uppercase tracking-wider"
-                      >
-                        FORMATECH
-                      </text>
-                    </svg>
+                  {/* Metallic Pivot Hub */}
+                  <div className="w-6 h-6 rounded-full bg-[#0A1124] border-2 border-[#E88607] shadow-xl flex items-center justify-center -mb-1 z-10">
+                    <div className="w-2 h-2 rounded-full bg-[#FDE68A] shadow-xs" />
                   </div>
+                  {/* Needle Blade in High-Visibility Red */}
+                  <div className="w-0 h-0 border-l-[14px] border-l-transparent border-r-[14px] border-r-transparent border-t-[32px] border-t-red-600 drop-shadow-2xl" />
                 </div>
-
-                {/* Bottom Stage Cutline Pedestal Glow */}
-                <div className="absolute bottom-0 inset-x-0 h-3 bg-gradient-to-t from-[#0A1124] via-[#12223B]/80 to-transparent pointer-events-none border-b-2 border-[#E88607]/40" />
               </div>
 
-              {/* THE MECHANICAL LEVER (العتلة) - POSITIONED BESIDE THE WHEEL */}
-              <div className="flex flex-col items-center justify-end shrink-0 pb-2">
-                {/* Pull Guidance Indicator */}
+              {/* Circular Outer Bezel Frame */}
+              <div
+                className={`relative w-full h-full rounded-full p-2 bg-gradient-to-b from-[#12223B] via-[#0E3B4F] to-[#12223B] border-4 sm:border-6 border-[#12223B] shadow-2xl transition-all duration-500 ${
+                  isDrawing
+                    ? "ring-4 ring-[#E88607] shadow-[0_0_60px_rgba(232,134,7,0.45)]"
+                    : "ring-2 ring-[rgba(234,240,246,0.15)] shadow-[0_0_35px_rgba(10,17,36,0.8)]"
+                }`}
+              >
+                {/* Rotating Graphic Wheel Disk */}
                 <div
-                  className={`text-center mb-2 transition-opacity duration-300 ${
-                    isDrawing ? "opacity-30" : "opacity-100 animate-bounce"
-                  }`}
-                >
-                  <span className="text-[11px] font-black text-[#E88607] block tracking-wider uppercase">
-                    اسحب أو اضغط Space
-                  </span>
-                  <ChevronDown className="w-5 h-5 text-[#E88607] mx-auto -mt-1" />
-                </div>
-
-                {/* The Physical Lever Arm Assembly */}
-                <div
-                  role="button"
-                  tabIndex={0}
-                  aria-label="اسحب العتلة لتدوير العجلة"
-                  aria-disabled={isDrawing || eligibleParticipants.length === 0}
-                  onClick={handlePullLever}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      handlePullLever();
-                    }
+                  ref={wheelDiskRef}
+                  className="w-full h-full rounded-full overflow-hidden will-change-transform"
+                  style={{
+                    transform: `rotate(${wheelRotation}deg)`,
                   }}
-                  className={`group relative flex flex-col items-center select-none cursor-pointer focus:outline-none ${
-                    isDrawing || eligibleParticipants.length === 0
-                      ? "opacity-50 cursor-not-allowed pointer-events-none"
-                      : "cursor-pointer"
-                  }`}
                 >
-                  {/* Lever Arm (Shaft & Grip Knob) that rotates when pulled */}
-                  <div
-                    className="flex flex-col items-center will-change-transform transition-transform duration-300 ease-out origin-bottom"
-                    style={{
-                      transform: isLeverPulling
-                        ? "rotate(52deg) translateY(24px) scaleY(0.92)"
-                        : "rotate(0deg)",
-                      transformOrigin: "center 210px",
-                    }}
-                  >
-                    {/* 3D Glossy Grip Knob in Oceanic Rust / Amber */}
-                    <div className="relative w-14 h-14 rounded-full bg-gradient-to-br from-[#E88607] via-[#CD6E10] to-[#B5500C] p-1 shadow-2xl group-hover:scale-105 group-hover:shadow-[0_0_30px_rgba(232,134,7,0.7)] transition-all">
-                      {/* Specular Highlight on Knob */}
-                      <div className="w-4 h-4 rounded-full bg-white/70 blur-[1px] absolute top-2 right-2.5" />
-                      <div className="w-full h-full rounded-full border border-white/30 flex items-center justify-center">
-                        <Sparkles className="w-5 h-5 text-white/95 drop-shadow-md" />
-                      </div>
-                    </div>
+                  <svg viewBox="0 0 400 400" className="w-full h-full block">
+                    <circle cx="200" cy="200" r="195" fill="#0A1124" stroke="#0E3B4F" strokeWidth="2.5" />
+                    <g transform="translate(200, 200)">
+                      {Array.from({ length: WHEEL_SEGMENTS_COUNT }).map((_, index) => {
+                        const sliceAngle = 360 / WHEEL_SEGMENTS_COUNT; // 45°
+                        const baseStartAngle = 270 - sliceAngle / 2; // 247.5°
+                        const startAngleDeg = baseStartAngle + index * sliceAngle;
+                        const endAngleDeg = startAngleDeg + sliceAngle;
+                        const midAngleDeg = startAngleDeg + sliceAngle / 2;
 
-                    {/* Chromed Metallic Shaft */}
-                    <div className="w-4 h-40 bg-gradient-to-r from-slate-400 via-slate-100 to-slate-500 rounded-b-md shadow-lg border-x border-slate-400 relative">
-                      <div className="absolute inset-y-0 left-1 w-1 bg-white/80" />
-                    </div>
-                  </div>
+                        const startAngleRad = (startAngleDeg * Math.PI) / 180;
+                        const endAngleRad = (endAngleDeg * Math.PI) / 180;
+                        const x1 = 195 * Math.cos(startAngleRad);
+                        const y1 = 195 * Math.sin(startAngleRad);
+                        const x2 = 195 * Math.cos(endAngleRad);
+                        const y2 = 195 * Math.sin(endAngleRad);
 
-                  {/* Heavy Steel Pivot Housing & Base */}
-                  <div className="w-16 h-14 -mt-2 rounded-2xl bg-gradient-to-b from-[#12223B] via-[#0A1124] to-black border-2 border-[rgba(234,240,246,0.18)] shadow-2xl flex flex-col items-center justify-center relative z-10">
-                    {/* Metallic Pivot Pin */}
-                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#FDE68A] via-[#E88607] to-[#CD6E10] border border-amber-200 shadow-inner flex items-center justify-center">
-                      <div className="w-2 h-2 rounded-full bg-[#0A1124]" />
-                    </div>
+                        const slotName = displayedNames[index] || "—";
+                        const color = SLICE_COLORS[index % SLICE_COLORS.length];
 
-                    {/* Status Indicator LED */}
-                    <div className="flex items-center gap-1 mt-1">
-                      <span
-                        className={`w-2 h-2 rounded-full ${
-                          isDrawing
-                            ? "bg-red-500 animate-ping"
-                            : eligibleParticipants.length === 0
-                            ? "bg-slate-500"
-                            : "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]"
-                        }`}
-                      />
-                    </div>
-                  </div>
+                        return (
+                          <g key={index}>
+                            <path
+                              d={`M 0 0 L ${x1} ${y1} A 195 195 0 0 1 ${x2} ${y2} Z`}
+                              fill={color}
+                              stroke="rgba(234, 240, 246, 0.2)"
+                              strokeWidth="2"
+                            />
+                            <g transform={`rotate(${midAngleDeg}) translate(115, 0)`}>
+                              <text
+                                x="0"
+                                y="0"
+                                fill="#EAF0F6"
+                                fontSize="11.5"
+                                fontWeight="800"
+                                textAnchor="middle"
+                                dominantBaseline="central"
+                                className="font-sans select-none tracking-tight"
+                              >
+                                {slotName.length > 15 ? slotName.slice(0, 14) + "…" : slotName}
+                              </text>
+                            </g>
+                          </g>
+                        );
+                      })}
+
+                      {/* 3D Golden Mechanical Pegs on Rim between each slice */}
+                      {Array.from({ length: WHEEL_SEGMENTS_COUNT }).map((_, index) => {
+                        const sliceAngle = 360 / WHEEL_SEGMENTS_COUNT; // 45°
+                        const baseStartAngle = 270 - sliceAngle / 2; // 247.5°
+                        const pegAngleDeg = baseStartAngle + index * sliceAngle;
+                        const pegRad = (pegAngleDeg * Math.PI) / 180;
+                        const px = 186 * Math.cos(pegRad);
+                        const py = 186 * Math.sin(pegRad);
+
+                        return (
+                          <g key={`peg-${index}`}>
+                            <circle cx={px} cy={py + 1.2} r="5" fill="#000000" opacity="0.6" />
+                            <circle cx={px} cy={py} r="4.5" fill="#CD6E10" />
+                            <circle cx={px - 0.8} cy={py - 0.8} r="2.8" fill="#FDE68A" />
+                            <circle cx={px - 1.2} cy={py - 1.2} r="1.2" fill="#FFFFFF" />
+                          </g>
+                        );
+                      })}
+                    </g>
+
+                    {/* Inner Center Hub with Crisp Dual Branding */}
+                    <circle cx="200" cy="200" r="48" fill="#0A1124" stroke="#E88607" strokeWidth="3" />
+                    <circle cx="200" cy="200" r="42" fill="#12223B" />
+                    <text
+                      x="200"
+                      y="197"
+                      fill="#FFFFFF"
+                      fontSize="10"
+                      fontWeight="900"
+                      textAnchor="middle"
+                      className="font-mono tracking-widest uppercase"
+                    >
+                      OCEANIC
+                    </text>
+                    <text
+                      x="200"
+                      y="211"
+                      fill="#E88607"
+                      fontSize="8.5"
+                      fontWeight="bold"
+                      textAnchor="middle"
+                      className="font-sans uppercase tracking-wider"
+                    >
+                      FORMATECH
+                    </text>
+                  </svg>
                 </div>
-
-                {/* Lever Base Subtitle */}
-                <span className="text-[10px] font-mono text-[#9FB1C6] mt-2 font-bold tracking-widest uppercase">
-                  PULL [SPACE]
-                </span>
               </div>
-
             </div>
 
           </div>
 
-          {/* RIGHT: WINNERS PODIUM & BOARD (COMPACT & SLEEK 4 COLS) */}
-          <div className="lg:col-span-4 h-full flex flex-col justify-start">
+          {/* [3] LEFT (اليسار): WINNERS PODIUM & HONOR BOARD */}
+          <div className="order-3 w-full lg:w-[350px] xl:w-[380px] shrink-0 flex flex-col justify-start">
             
             <div className="bg-[#12223B]/85 rounded-2xl border border-[rgba(234,240,246,0.14)] p-4 shadow-2xl backdrop-blur-md flex flex-col h-[340px] sm:h-[370px]">
               
@@ -1457,13 +1340,9 @@ export function ProjectorMode({
         </div>
       </Modal>
 
-      {/* 5. FLOATING KEYBOARD SHORTCUTS GUIDE BAR */}
-      <div
-        className={`fixed bottom-3 left-1/2 -translate-x-1/2 z-30 transition-all duration-300 ${
-          isHeaderVisible ? "opacity-100 translate-y-0" : "opacity-40 hover:opacity-100 translate-y-0"
-        }`}
-      >
-        <div className="flex items-center gap-2 sm:gap-4 px-4 py-1.5 rounded-full bg-[#12223B]/80 border border-[rgba(234,240,246,0.12)] backdrop-blur-md text-[11px] text-[#9FB1C6] shadow-xl">
+      {/* 5. FLOATING KEYBOARD SHORTCUTS GUIDE BAR (POSITIONED ABOVE FOOTER WITH NO OVERLAP) */}
+      <div className="w-full flex justify-center py-2 z-20 shrink-0">
+        <div className="flex items-center gap-2 sm:gap-4 px-4 py-1.5 rounded-full bg-[#12223B]/90 border border-[rgba(234,240,246,0.14)] backdrop-blur-md text-[11px] text-[#9FB1C6] shadow-xl">
           <div className="flex items-center gap-1.5">
             <kbd className="px-1.5 py-0.5 rounded bg-[#0A1124] border border-white/10 font-mono text-[10px] text-white font-bold">Space</kbd>
             <span className="hidden sm:inline">تدوير العجلة</span>
@@ -1471,17 +1350,17 @@ export function ProjectorMode({
           <span className="text-white/20">•</span>
           <div className="flex items-center gap-1.5">
             <kbd className="px-1.5 py-0.5 rounded bg-[#0A1124] border border-white/10 font-mono text-[10px] text-white font-bold">Esc</kbd>
-            <span className="hidden sm:inline">إغلاق</span>
-          </div>
-          <span className="text-white/20">•</span>
-          <div className="flex items-center gap-1.5">
-            <kbd className="px-1.5 py-0.5 rounded bg-[#0A1124] border border-white/10 font-mono text-[10px] text-white font-bold">F</kbd>
-            <span className="hidden sm:inline">ملء الشاشة</span>
+            <span className="hidden sm:inline">إغلاق النافذة</span>
           </div>
           <span className="text-white/20">•</span>
           <div className="flex items-center gap-1.5">
             <kbd className="px-1.5 py-0.5 rounded bg-[#0A1124] border border-white/10 font-mono text-[10px] text-white font-bold">M</kbd>
             <span className="hidden sm:inline">الصوت</span>
+          </div>
+          <span className="text-white/20">•</span>
+          <div className="flex items-center gap-1.5">
+            <kbd className="px-1.5 py-0.5 rounded bg-[#0A1124] border border-white/10 font-mono text-[10px] text-white font-bold">F</kbd>
+            <span className="hidden sm:inline">ملء الشاشة</span>
           </div>
         </div>
       </div>
