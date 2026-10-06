@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { FormaTechLogo } from "./FormaTechLogo";
 import { CountdownTimer } from "./CountdownTimer";
-import { Sparkles, ArrowDown, Award } from "lucide-react";
+import { Sparkles, ArrowDown, BookOpen } from "lucide-react";
 
 export function HeroSection({ eventDate }: { eventDate?: string }) {
   const t = useTranslations("hero");
@@ -86,10 +86,10 @@ export function HeroSection({ eventDate }: { eventDate?: string }) {
         {/* Quick Jump Action Pills: Stack on mobile, inline on desktop */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-3 w-full max-w-xs sm:max-w-none px-2 sm:px-4">
           <a
-            href="#voting"
+            href="#cards-showcase"
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 sm:py-3.5 rounded-xl bg-gradient-to-r from-brand-orange-rust via-brand-orange-amber to-brand-orange-gold hover:brightness-110 text-white text-xs sm:text-sm font-bold shadow-lg hover:shadow-xl transition-all active:scale-[0.99] border border-white/20"
           >
-            <Award className="w-4 h-4 text-white" />
+            <BookOpen className="w-4 h-4 text-white" />
             <span>{t("voteAction")}</span>
             <ArrowDown className="w-3.5 h-3.5" />
           </a>

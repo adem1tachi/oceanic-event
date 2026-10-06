@@ -6,7 +6,7 @@ import { WifiOff } from "lucide-react";
 
 export function OfflineBanner() {
   const [isOffline, setIsOffline] = useState(false);
-  const t = useTranslations("voting");
+  const t = useTranslations("common");
 
   useEffect(() => {
     // Initial check

@@ -15,7 +15,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-export type AdminTab = "stats" | "participants" | "raffle" | "settings";
+export type AdminTab = "stats" | "participants" | "settings";
 
 interface AdminSidebarProps {
   activeTab: AdminTab;
@@ -46,9 +46,8 @@ export function AdminSidebar({
   };
 
   const navItems: { id: AdminTab; label: string; icon: any }[] = [
-    { id: "stats", label: "Statistics", icon: BarChart3 },
+    { id: "stats", label: "Traffic & Statistics", icon: BarChart3 },
     { id: "participants", label: "Participants", icon: Users },
-    { id: "raffle", label: "Raffle Draw", icon: Trophy },
     { id: "settings", label: "Settings", icon: Settings },
   ];
 

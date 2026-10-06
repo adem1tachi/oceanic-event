@@ -17,8 +17,21 @@ import {
   Users,
   BookOpen,
   Award,
-  Ticket,
+  Download,
+  BookMarked,
 } from "lucide-react";
+
+export const DEPARTMENTS = [
+  "Achat et commerce international",
+  "Transport et logistique",
+  "Transport maritime des marchandises",
+  "Dédouanement",
+  "Supply chain management",
+  "Gestion des ports maritimes",
+  "Comptabilité",
+  "Marketing et commercial",
+  "Fiscalité",
+];
 
 interface RegisterFormProps {
   isRegistrationOpen?: boolean;
@@ -27,37 +40,9 @@ interface RegisterFormProps {
 
 export function RegisterForm({
   isRegistrationOpen = true,
-  topics = [],
 }: RegisterFormProps) {
   const t = useTranslations("register");
   const locale = useLocale();
-
-  // Dynamic Topics from Database
-  const [topicList, setTopicList] = useState<{ slug: string; title?: string }[]>(topics || []);
-
-  useEffect(() => {
-    if (topics && topics.length > 0) {
-      setTopicList(topics);
-      return;
-    }
-
-    async function loadTopics() {
-      try {
-        const supabase = createClient();
-        const { data } = await supabase
-          .from("topics")
-          .select("slug, title")
-          .order("position", { ascending: true });
-        if (data && data.length > 0) {
-          setTopicList(data.map((d) => ({ slug: d.slug, title: d.title || undefined })));
-        }
-      } catch (err) {
-        console.warn("[RegisterForm] Error fetching topics:", err);
-      }
-    }
-
-    loadTopics();
-  }, [topics]);
 
   // Form Fields State
   const [firstName, setFirstName] = useState("");
@@ -167,7 +152,21 @@ export function RegisterForm({
         return;
       }
 
-      // Success: Save submitted state to show the confirmation message
+      // Success: Automatically trigger browser download of the PDF booklet
+      if (typeof document !== "undefined") {
+        try {
+          const downloadLink = document.createElement("a");
+          downloadLink.href = "/oceanic-guide-2026.pdf";
+          downloadLink.download = "OCEANIC-Guide-Formatech-2026.pdf";
+          document.body.appendChild(downloadLink);
+          downloadLink.click();
+          document.body.removeChild(downloadLink);
+        } catch (downloadErr) {
+          console.warn("[RegisterForm] Auto-download triggered via browser:", downloadErr);
+        }
+      }
+
+      // Save submitted state to show the confirmation message
       setSubmittedData({
         firstName,
         lastName,
@@ -306,15 +305,26 @@ export function RegisterForm({
             </div>
           </div>
 
-          {/* Action button */}
+          {/* Action buttons with direct PDF download */}
           <div className="mt-6 flex flex-col sm:flex-row items-center gap-3">
             <a
-              href="#voting"
-              className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-brand-navy-dark text-white text-xs sm:text-sm font-bold text-center hover:bg-brand-navy-slate transition-colors shadow-xs"
+              href="/oceanic-guide-2026.pdf"
+              download="OCEANIC-Guide-Formatech-2026.pdf"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-brand-orange-rust via-brand-orange-amber to-brand-orange-gold hover:brightness-110 text-white text-xs sm:text-sm font-bold shadow-lg hover:shadow-xl transition-all active:scale-[0.99]"
+            >
+              <Download className="w-4 h-4" />
+              <span>{t("confirmation.downloadAgain")}</span>
+            </a>
+            <a
+              href="#cards-showcase"
+              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs sm:text-sm font-bold text-center border border-white/15 transition-colors shadow-xs"
             >
               {t("confirmation.viewResultsAction")}
             </a>
           </div>
+          <p className="text-[11px] text-slate-400 mt-2.5">
+            {t("confirmation.downloadNotice")}
+          </p>
         </div>
       </section>
     );
@@ -330,7 +340,7 @@ export function RegisterForm({
         {/* Section Heading with Badge */}
         <div className="mb-6 sm:mb-8">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-orange-gold/15 text-brand-orange-gold border border-brand-orange-gold/30 text-xs font-bold uppercase tracking-wider mb-3">
-            <Ticket className="w-3.5 h-3.5" />
+            <BookMarked className="w-3.5 h-3.5" />
             <span>{t("badge")}</span>
           </div>
           <h2
@@ -585,15 +595,14 @@ export function RegisterForm({
                         : "hover:border-white/25 focus:border-brand-orange-gold focus:ring-2 focus:ring-brand-orange-gold/30"
                     }`}
                   >
-                    <option value="" className="bg-[#0A1124] text-slate-400">{t("desiredTopicPlaceholder")}</option>
-                    {topicList.map((tItem) => {
-                      const displayTitle = tItem.title || t(`topics.${tItem.slug}.title` as any);
-                      return (
-                        <option key={tItem.slug} value={displayTitle} className="bg-[#0A1124] text-white">
-                          {displayTitle}
-                        </option>
-                      );
-                    })}
+                    <option value="" className="bg-[#0A1124] text-slate-400">
+                      {t("desiredTopicPlaceholder")}
+                    </option>
+                    {DEPARTMENTS.map((dept) => (
+                      <option key={dept} value={dept} className="bg-[#0A1124] text-white">
+                        {dept}
+                      </option>
+                    ))}
                   </select>
                 </div>
 

@@ -1,27 +1,26 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { VoteData } from "../VotingSection";
+import type { SiteAnalyticsSummary } from "@/app/[locale]/admin/page";
 import {
   BarChart3,
   Users,
-  Award,
+  RefreshCw,
+  ExternalLink,
   Clock,
-  Trophy,
+  Download,
+  Building,
+  Layers,
 } from "lucide-react";
 
 interface AdminStatsTabProps {
-  voteResults: VoteData[];
+  analytics: SiteAnalyticsSummary;
   participants: any[];
-  winnersCount: number;
-  topics?: { slug: string; title: string }[];
 }
 
 export function AdminStatsTab({
-  voteResults,
+  analytics,
   participants,
-  winnersCount,
-  topics = [],
 }: AdminStatsTabProps) {
   const [hoveredPoint, setHoveredPoint] = useState<{
     time: string;
@@ -30,34 +29,25 @@ export function AdminStatsTab({
     y: number;
   } | null>(null);
 
-  const totalVotes = useMemo(() => {
-    return voteResults.reduce((acc, curr) => acc + Number(curr.count), 0);
-  }, [voteResults]);
-
   const totalContacts = participants.length;
 
-  const leadingTopic = useMemo(() => {
-    if (voteResults.length === 0) return null;
-    return voteResults.reduce((prev, current) =>
-      Number(current.count) > Number(prev.count) ? current : prev
-    );
-  }, [voteResults]);
+  // Department distribution breakdown from registered participants
+  const departmentBreakdown = useMemo(() => {
+    const counts: Record<string, number> = {};
+    participants.forEach((p) => {
+      const dept = p.desired_topic?.trim();
+      if (dept) {
+        counts[dept] = (counts[dept] || 0) + 1;
+      }
+    });
 
-  const topicTitles = useMemo<Record<string, string>>(() => {
-    const map: Record<string, string> = {
-      "topic-a": "الذكاء الاصطناعي التوليدي والنماذج اللغوية",
-      "topic-b": "هندسة السحابة وحلول الديف أوبس (Cloud & DevOps)",
-      "topic-c": "الأمن السيبراني والدفاع ضد التهديدات",
-    };
-    if (topics && topics.length > 0) {
-      topics.forEach((t) => {
-        if (t.slug && t.title) {
-          map[t.slug] = t.title;
-        }
-      });
-    }
-    return map;
-  }, [topics]);
+    const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+    return entries.map(([dept, count]) => ({
+      name: dept,
+      count,
+      percentage: totalContacts > 0 ? Math.round((count / totalContacts) * 100) : 0,
+    }));
+  }, [participants, totalContacts]);
 
   // Timeline data (08:00 to 18:00) using real participant registration timestamps
   const timelineData = useMemo(() => {
@@ -131,66 +121,128 @@ export function AdminStatsTab({
   } L ${points[0].x} ${chartHeight - paddingY} Z`;
 
   return (
-    <div className="space-y-6 text-left">
+    <div className="space-y-6 text-left font-sans">
       {/* Page Title */}
-      <div>
-        <h1 className="text-xl font-bold text-slate-900">Statistics</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900">
+            Traffic & Analytics
+          </h1>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Real-time visitor traffic, guide downloads, and official website engagement
+          </p>
+        </div>
+        <div className="flex items-center gap-2 text-xs font-medium text-slate-500 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-2xs">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span>Live Tracking Active</span>
+        </div>
       </div>
 
-      {/* 4 Minimal KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <div className="bg-white rounded-xl border border-slate-200 p-4">
-          <span className="text-xs text-slate-500 font-medium block">Total Votes</span>
+      {/* 5 Real-Time KPI Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
+        {/* 1. Total Site Visits */}
+        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-2xs">
+          <span className="text-xs text-slate-500 font-medium block">
+            Total Site Visits
+          </span>
           <div className="flex items-baseline justify-between mt-2">
-            <span className="text-2xl font-bold text-slate-900 font-mono">{totalVotes}</span>
+            <span className="text-2xl font-bold text-slate-900 font-mono">
+              {analytics.totalVisits}
+            </span>
             <span className="p-1.5 rounded-lg bg-blue-50 text-blue-600">
               <BarChart3 className="w-4 h-4" />
             </span>
           </div>
+          <span className="text-[11px] text-slate-400 mt-1 block">
+            All page views
+          </span>
         </div>
 
-        <div className="bg-white rounded-xl border border-slate-200 p-4">
-          <span className="text-xs text-slate-500 font-medium block">Participants</span>
+        {/* 2. Unique Visitors */}
+        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-2xs">
+          <span className="text-xs text-slate-500 font-medium block">
+            Unique Visitors
+          </span>
           <div className="flex items-baseline justify-between mt-2">
-            <span className="text-2xl font-bold text-slate-900 font-mono">{totalContacts}</span>
-            <span className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600">
+            <span className="text-2xl font-bold text-slate-900 font-mono">
+              {analytics.uniqueVisitors}
+            </span>
+            <span className="p-1.5 rounded-lg bg-indigo-50 text-indigo-600">
               <Users className="w-4 h-4" />
             </span>
           </div>
+          <span className="text-[11px] text-slate-400 mt-1 block">
+            Distinct devices
+          </span>
         </div>
 
-        <div className="bg-white rounded-xl border border-slate-200 p-4">
-          <span className="text-xs text-slate-500 font-medium block">Winners</span>
+        {/* 3. Return Rate % */}
+        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-2xs">
+          <span className="text-xs text-slate-500 font-medium block">
+            Return Rate
+          </span>
           <div className="flex items-baseline justify-between mt-2">
-            <span className="text-2xl font-bold text-slate-900 font-mono">{winnersCount}</span>
+            <span className="text-2xl font-bold text-slate-900 font-mono">
+              {analytics.returnRate}%
+            </span>
             <span className="p-1.5 rounded-lg bg-amber-50 text-amber-600">
-              <Trophy className="w-4 h-4" />
+              <RefreshCw className="w-4 h-4" />
             </span>
           </div>
+          <span className="text-[11px] text-slate-400 mt-1 block">
+            {analytics.returningVisitors} returning visitors
+          </span>
         </div>
 
-        <div className="bg-white rounded-xl border border-slate-200 p-4">
-          <span className="text-xs text-slate-500 font-medium block">Leading Topic</span>
+        {/* 4. Official Website Clicks */}
+        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-2xs">
+          <span className="text-xs text-slate-500 font-medium block">
+            Official Website Clicks
+          </span>
           <div className="flex items-baseline justify-between mt-2">
-            <span className="text-sm font-bold text-slate-900 truncate" title={leadingTopic?.topic_slug}>
-              {leadingTopic ? (topicTitles[leadingTopic.topic_slug] || leadingTopic.topic_slug) : "—"}
+            <span className="text-2xl font-bold text-slate-900 font-mono">
+              {analytics.officialClicks}
             </span>
-            <span className="p-1.5 rounded-lg bg-purple-50 text-purple-600 shrink-0">
-              <Award className="w-4 h-4" />
+            <span className="p-1.5 rounded-lg bg-purple-50 text-purple-600">
+              <ExternalLink className="w-4 h-4" />
             </span>
           </div>
+          <span className="text-[11px] text-slate-400 mt-1 block">
+            oceanic-dz.com links
+          </span>
+        </div>
+
+        {/* 5. Guide Recipients (Participants) */}
+        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-2xs col-span-2 lg:col-span-1">
+          <span className="text-xs text-slate-500 font-medium block">
+            Guide Recipients
+          </span>
+          <div className="flex items-baseline justify-between mt-2">
+            <span className="text-2xl font-bold text-emerald-600 font-mono">
+              {totalContacts}
+            </span>
+            <span className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600">
+              <Download className="w-4 h-4" />
+            </span>
+          </div>
+          <span className="text-[11px] text-slate-400 mt-1 block">
+            PDF booklet leads
+          </span>
         </div>
       </div>
 
       {/* TIMELINE CHART */}
-      <div className="bg-white rounded-xl border border-slate-200 p-5">
+      <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-2xs">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 text-blue-600" />
             <h2 className="text-sm font-bold text-slate-900">
-              Registrations by Hour
+              Registrations & Activity by Hour
             </h2>
           </div>
+          <span className="text-xs text-slate-500 font-mono">
+            Fair hours (08:00 – 18:00)
+          </span>
         </div>
 
         <div className="relative w-full overflow-x-auto">
@@ -279,65 +331,60 @@ export function AdminStatsTab({
                   top: `${(hoveredPoint.y / chartHeight) * 100}%`,
                 }}
               >
-                {hoveredPoint.time}: {hoveredPoint.count} registrants
+                {hoveredPoint.time}: {hoveredPoint.count} registrations
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* BAR CHART: 3 Topics */}
-      <div className="bg-white rounded-xl border border-slate-200 p-5">
+      {/* DEPARTMENT INTEREST BREAKDOWN */}
+      <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-2xs">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <BarChart3 className="w-4 h-4 text-blue-600" />
+            <Layers className="w-4 h-4 text-emerald-600" />
             <h2 className="text-sm font-bold text-slate-900">
-              Voting Results by Topic
+              Department & Specialty Breakdown
             </h2>
           </div>
           <span className="text-xs text-slate-500 font-mono">
-            {totalVotes} total votes
+            {totalContacts} total requests
           </span>
         </div>
 
-        <div className="space-y-4">
-          {voteResults.map((topic, index) => {
-            const count = Number(topic.count);
-            const percentage =
-              totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0;
-            const isLeading = leadingTopic?.topic_id === topic.topic_id && totalVotes > 0;
-            const title = topicTitles[topic.topic_slug] || `Topic #${index + 1}`;
-
-            return (
-              <div key={topic.topic_id} className="space-y-1.5">
+        {departmentBreakdown.length === 0 ? (
+          <div className="py-8 text-center text-xs text-slate-400">
+            No department data recorded yet.
+          </div>
+        ) : (
+          <div className="space-y-3.5">
+            {departmentBreakdown.map((dept, idx) => (
+              <div key={dept.name} className="space-y-1.5">
                 <div className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2 truncate">
-                    <span className="text-slate-400 font-mono">#{index + 1}</span>
-                    <span className="font-semibold text-slate-800 truncate">{title}</span>
-                    {isLeading && (
-                      <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                        Leading
-                      </span>
-                    )}
+                    <span className="text-slate-400 font-mono text-[11px]">
+                      #{idx + 1}
+                    </span>
+                    <span className="font-semibold text-slate-800 truncate">
+                      {dept.name}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2 font-mono shrink-0">
-                    <span className="text-slate-500">{count} votes</span>
-                    <span className="font-bold text-slate-900">{percentage}%</span>
+                    <span className="text-slate-500">{dept.count} requests</span>
+                    <span className="font-bold text-slate-900">{dept.percentage}%</span>
                   </div>
                 </div>
 
-                <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
                   <div
-                    className={`h-full rounded-full transition-all duration-500 ${
-                      isLeading ? "bg-blue-600" : "bg-slate-400"
-                    }`}
-                    style={{ width: `${Math.max(percentage, totalVotes > 0 ? 2 : 0)}%` }}
+                    className="h-full rounded-full bg-emerald-600 transition-all duration-500"
+                    style={{ width: `${Math.max(dept.percentage, 2)}%` }}
                   />
                 </div>
               </div>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

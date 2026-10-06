@@ -26,14 +26,14 @@ export interface FormattedParticipant {
 
 interface AdminParticipantsTabProps {
   initialParticipants: any[];
-  winners: any[];
+  winners?: any[];
   initialStatuses?: Record<string, "new" | "contacted" | "winner">;
   onStatusesUpdated?: (statuses: Record<string, "new" | "contacted" | "winner">) => void;
 }
 
 export function AdminParticipantsTab({
   initialParticipants,
-  winners,
+  winners = [],
   initialStatuses = {},
   onStatusesUpdated,
 }: AdminParticipantsTabProps) {

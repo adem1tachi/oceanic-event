@@ -184,6 +184,36 @@ export interface Database {
         };
         Relationships: [];
       };
+      site_analytics: {
+        Row: {
+          id: string;
+          event_type: string;
+          visitor_id: string;
+          session_id: string | null;
+          url: string | null;
+          metadata: Json;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          event_type: string;
+          visitor_id: string;
+          session_id?: string | null;
+          url?: string | null;
+          metadata?: Json;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          event_type?: string;
+          visitor_id?: string;
+          session_id?: string | null;
+          url?: string | null;
+          metadata?: Json;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       vote_counts: {
