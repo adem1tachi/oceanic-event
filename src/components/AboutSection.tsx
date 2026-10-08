@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Gem, GraduationCap, Bell, ArrowUpRight, Building2 } from "lucide-react";
+import { Gem, GraduationCap, Bell } from "lucide-react";
 import Image from "next/image";
 
 export function AboutSection() {
@@ -37,8 +37,7 @@ export function AboutSection() {
       <div className="depth-lines" aria-hidden="true" />
       <div className="w-full max-w-4xl mx-auto relative z-10">
         {/* Category Badge Pill */}
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-orange-gold/15 text-brand-orange-gold border border-brand-orange-gold/30 text-xs font-bold uppercase tracking-wider mb-3">
-          <Building2 className="w-3.5 h-3.5" />
+        <div className="inline-flex items-center px-3.5 py-1 rounded-full bg-brand-orange-gold/15 text-brand-orange-gold border border-brand-orange-gold/30 text-xs font-bold uppercase tracking-wider mb-3">
           <span>{t("badge")}</span>
         </div>
 
@@ -109,10 +108,9 @@ export function AboutSection() {
                     href={t(`${item.key}.url`)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-between w-full min-h-[44px] py-2.5 px-3.5 rounded-xl bg-white/5 text-token-primary text-xs font-bold border border-white/10 hover:bg-gradient-to-r hover:from-brand-orange-rust hover:to-brand-orange-gold hover:border-transparent hover:text-white transition-all group/btn"
+                    className="inline-flex items-center justify-center w-full min-h-[44px] py-2.5 px-3.5 rounded-xl bg-white/5 text-token-primary text-xs font-bold border border-white/10 hover:bg-gradient-to-r hover:from-brand-orange-rust hover:to-brand-orange-gold hover:border-transparent hover:text-white transition-all text-center"
                   >
                     <span>{t("seeMore")}</span>
-                    <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover/btn:text-white group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 rtl:group-hover/btn:-translate-x-0.5 transition-all" />
                   </a>
                 </div>
               </div>

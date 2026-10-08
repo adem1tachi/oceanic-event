@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { FormaTechLogo } from "./FormaTechLogo";
 import { CountdownTimer } from "./CountdownTimer";
-import { Sparkles, ArrowDown, BookOpen } from "lucide-react";
+// Lucide icons removed from badge and buttons per design requirements
 
 export function HeroSection({ eventDate }: { eventDate?: string }) {
   const t = useTranslations("hero");
@@ -14,7 +14,7 @@ export function HeroSection({ eventDate }: { eventDate?: string }) {
       {/* Background Image: Crisp, visible, realistic maritime logistics port */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none">
         <Image
-          src="/hero-bg.jpg"
+          src="/hero-bg.webp"
           alt="OCEANIC Port & Maritime Logistics"
           fill
           priority
@@ -31,8 +31,7 @@ export function HeroSection({ eventDate }: { eventDate?: string }) {
       {/* Foreground Content with explicit z-10 */}
       <div className="relative z-10 w-full flex flex-col items-center">
         {/* Event Top Badge (Glass Pill) */}
-        <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-brand-orange-gold text-[11px] sm:text-xs font-bold uppercase tracking-wider mb-5 sm:mb-6 shadow-sm">
-          <Sparkles className="w-3.5 h-3.5 text-brand-orange-gold" aria-hidden="true" />
+        <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-brand-orange-gold text-[11px] sm:text-xs font-bold uppercase tracking-wider mb-5 sm:mb-6 shadow-sm">
           <span>{t("badge")}</span>
         </div>
 
@@ -61,21 +60,30 @@ export function HeroSection({ eventDate }: { eventDate?: string }) {
           </div>
         </div>
 
-        {/* Short Tagline */}
-        <div className="max-w-2xl mx-auto px-2 sm:px-4 mb-2">
-          <p className="text-xs sm:text-base md:text-lg font-bold text-brand-orange-gold drop-shadow-sm">
-            {t("tagline")}
-          </p>
-        </div>
-
-        {/* Hero Headline Hook */}
-        <h1 className="text-xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-[1.25] sm:leading-[1.2] max-w-3xl mx-auto px-1 sm:px-4 drop-shadow-md">
-          {t("hook")}
+        {/* Hero Headline Title */}
+        <h1 className="text-xl sm:text-3xl md:text-5xl font-black text-white tracking-tight leading-[1.25] sm:leading-[1.2] max-w-3xl mx-auto px-1 sm:px-4 drop-shadow-md mt-1">
+          {t.rich("title", {
+            gold: (chunks) => (
+              <span className="text-brand-orange-gold inline-block">
+                {chunks}
+              </span>
+            ),
+            gradient: (chunks) => (
+              <span className="bg-gradient-to-r from-[#F59E0B] via-[#E88607] to-[#CD6E10] bg-clip-text text-transparent inline-block">
+                {chunks}
+              </span>
+            ),
+            accent: (chunks) => (
+              <span className="text-amber-300 inline-block">
+                {chunks}
+              </span>
+            ),
+          })}
         </h1>
 
-        {/* Prize sentence / explanation */}
-        <p className="text-xs sm:text-base md:text-lg text-slate-200 mt-2.5 sm:mt-3 mb-6 sm:mb-8 max-w-2xl mx-auto px-1 sm:px-4 leading-relaxed font-medium drop-shadow-sm">
-          {t("prizeSentence")}
+        {/* Hero Subtitle */}
+        <p className="text-xs sm:text-base md:text-lg text-slate-200 mt-3 sm:mt-4 mb-6 sm:mb-8 max-w-2xl mx-auto px-1 sm:px-4 leading-relaxed font-medium drop-shadow-sm">
+          {t("subtitle")}
         </p>
 
         {/* Countdown Timer (time remaining before the draw) */}
@@ -86,20 +94,17 @@ export function HeroSection({ eventDate }: { eventDate?: string }) {
         {/* Quick Jump Action Pills: Stack on mobile, inline on desktop */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-3 w-full max-w-xs sm:max-w-none px-2 sm:px-4">
           <a
-            href="#cards-showcase"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 sm:py-3.5 rounded-xl bg-gradient-to-r from-brand-orange-rust via-brand-orange-amber to-brand-orange-gold hover:brightness-110 text-white text-xs sm:text-sm font-bold shadow-lg hover:shadow-xl transition-all active:scale-[0.99] border border-white/20"
+            href="#register"
+            className="w-full sm:w-auto inline-flex items-center justify-center px-7 py-3 sm:py-3.5 rounded-xl bg-gradient-to-r from-brand-orange-rust via-brand-orange-amber to-brand-orange-gold hover:brightness-110 text-white text-xs sm:text-sm font-bold shadow-lg hover:shadow-xl transition-all active:scale-[0.99] border border-white/20"
           >
-            <BookOpen className="w-4 h-4 text-white" />
-            <span>{t("voteAction")}</span>
-            <ArrowDown className="w-3.5 h-3.5" />
+            <span>{t("downloadAction")}</span>
           </a>
 
           <a
-            href="#register"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 sm:py-3.5 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/20 text-xs sm:text-sm font-bold hover:shadow-lg transition-all active:scale-[0.99] shadow-md"
+            href="#about"
+            className="w-full sm:w-auto inline-flex items-center justify-center px-7 py-3 sm:py-3.5 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/20 text-xs sm:text-sm font-bold hover:shadow-lg transition-all active:scale-[0.99] shadow-md"
           >
-            <span>{t("registerAction")}</span>
-            <ArrowDown className="w-3.5 h-3.5 text-white/80" />
+            <span>{t("aboutAction")}</span>
           </a>
         </div>
       </div>

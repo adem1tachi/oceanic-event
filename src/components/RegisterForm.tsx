@@ -6,7 +6,6 @@ import { Input } from "./ui/Input";
 import { registrationSchema } from "@/lib/validators";
 import { createClient } from "@/lib/supabase/client";
 import {
-  Check,
   AlertCircle,
   Phone,
   Mail,
@@ -17,8 +16,6 @@ import {
   Users,
   BookOpen,
   Award,
-  Download,
-  BookMarked,
 } from "lucide-react";
 
 export const DEPARTMENTS = [
@@ -199,8 +196,7 @@ export function RegisterForm({
           />
 
           {/* Success Header Badge */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-950/60 text-emerald-300 border border-emerald-500/30 text-xs font-bold uppercase tracking-wider mb-4">
-            <Check className="w-4 h-4 text-emerald-400" />
+          <div className="inline-flex items-center px-4 py-1 rounded-full bg-emerald-950/60 text-emerald-300 border border-emerald-500/30 text-xs font-bold uppercase tracking-wider mb-4">
             <span>{t("confirmation.badge")}</span>
           </div>
 
@@ -230,7 +226,7 @@ export function RegisterForm({
               <div>
                 <span className="text-slate-400 block">{t("confirmation.orgLabel")}:</span>
                 <span className="font-bold text-token-primary">
-                  {submittedData.company} — {submittedData.position}
+                  {submittedData.company} • {submittedData.position}
                 </span>
               </div>
               <div>
@@ -310,9 +306,8 @@ export function RegisterForm({
             <a
               href="/oceanic-guide-2026.pdf"
               download="OCEANIC-Guide-Formatech-2026.pdf"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-brand-orange-rust via-brand-orange-amber to-brand-orange-gold hover:brightness-110 text-white text-xs sm:text-sm font-bold shadow-lg hover:shadow-xl transition-all active:scale-[0.99]"
+              className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 rounded-xl bg-gradient-to-r from-brand-orange-rust via-brand-orange-amber to-brand-orange-gold hover:brightness-110 text-white text-xs sm:text-sm font-bold shadow-lg hover:shadow-xl transition-all active:scale-[0.99]"
             >
-              <Download className="w-4 h-4" />
               <span>{t("confirmation.downloadAgain")}</span>
             </a>
             <a
@@ -339,8 +334,7 @@ export function RegisterForm({
       <div className="w-full max-w-2xl mx-auto rounded-2xl sm:rounded-3xl bg-[#12223B] shadow-xl border border-white/10 p-4 sm:p-10 relative overflow-hidden">
         {/* Section Heading with Badge */}
         <div className="mb-6 sm:mb-8">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-orange-gold/15 text-brand-orange-gold border border-brand-orange-gold/30 text-xs font-bold uppercase tracking-wider mb-3">
-            <BookMarked className="w-3.5 h-3.5" />
+          <div className="inline-flex items-center px-3.5 py-1 rounded-full bg-brand-orange-gold/15 text-brand-orange-gold border border-brand-orange-gold/30 text-xs font-bold uppercase tracking-wider mb-3">
             <span>{t("badge")}</span>
           </div>
           <h2
