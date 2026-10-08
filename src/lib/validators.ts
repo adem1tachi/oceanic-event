@@ -150,15 +150,6 @@ export const registrationSchema = z
 export type RegistrationInput = z.infer<typeof registrationSchema>;
 
 /**
- * Vote submission validation schema
- */
-export const voteSchema = z.object({
-  topicId: z.string().uuid({ message: "validation.invalid_topic_id" }),
-});
-
-export type VoteInput = z.infer<typeof voteSchema>;
-
-/**
  * Admin raffle draw validation schema
  */
 export const raffleDrawSchema = z

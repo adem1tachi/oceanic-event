@@ -32,7 +32,6 @@ export const DEPARTMENTS = [
 
 interface RegisterFormProps {
   isRegistrationOpen?: boolean;
-  topics?: { slug: string; title?: string }[];
 }
 
 export function RegisterForm({

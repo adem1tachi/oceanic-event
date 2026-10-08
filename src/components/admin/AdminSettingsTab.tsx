@@ -2,7 +2,7 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { useState } from "react";
-import { AppSettings, CustomTopicConfig } from "@/lib/settings";
+import { AppSettings } from "@/lib/settings";
 import {
   Download,
   Upload,
@@ -11,10 +11,7 @@ import {
   AlertCircle,
   ToggleLeft,
   ToggleRight,
-  ImageIcon,
   RefreshCw,
-  Loader2,
-  Trash2,
 } from "lucide-react";
 
 interface AdminSettingsTabProps {
@@ -38,11 +35,6 @@ export function AdminSettingsTab({
     message: string;
     type: "success" | "error";
   } | null>(null);
-
-  const [topics, setTopics] = useState<CustomTopicConfig[]>(
-    initialSettings.topics || []
-  );
-  const [uploadingTopicIndex, setUploadingTopicIndex] = useState<number | null>(null);
 
   const showNotification = (
     message: string,
@@ -196,78 +188,7 @@ export function AdminSettingsTab({
     }
   };
 
-  // 5. Topic Fields
-  const handleTopicFieldChange = (
-    index: number,
-    field: keyof CustomTopicConfig,
-    value: string
-  ) => {
-    setTopics((prev) => {
-      const next = [...prev];
-      next[index] = {
-        ...next[index],
-        [field]: value,
-      };
-      return next;
-    });
-  };
 
-  const handleImageFileChange = async (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // Reset input value so same file can be re-selected if needed
-    e.target.value = "";
-
-    setUploadingTopicIndex(index);
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const currentTopic = topics[index];
-      formData.append("topicSlug", currentTopic?.slug || `topic-${index + 1}`);
-
-      const res = await fetch("/api/admin/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await res.json();
-      if (res.ok && data.success && data.url) {
-        handleTopicFieldChange(index, "imageUrl", data.url);
-        showNotification("Image uploaded to Supabase Storage.");
-      } else {
-        showNotification(data.error || "Failed to upload image.", "error");
-      }
-    } catch (err: any) {
-      showNotification("Upload failed: " + (err?.message || "Network error"), "error");
-    } finally {
-      setUploadingTopicIndex(null);
-    }
-  };
-
-  const handleSaveTopics = async () => {
-    setIsSavingSettings(true);
-    try {
-      const res = await fetch("/api/admin/settings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topics }),
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        const updated = { ...settings, topics };
-        setSettings(updated);
-        if (onSettingsUpdated) onSettingsUpdated(updated);
-        showNotification("Topics saved successfully.");
-      } else {
-        showNotification(data.error || "Failed to save topics.", "error");
-      }
-    } catch {
-      showNotification("Server connection error.", "error");
-    } finally {
-      setIsSavingSettings(false);
-    }
-  };
 
   return (
     <div className="space-y-6 text-left">
@@ -465,181 +386,6 @@ export function AdminSettingsTab({
               )}
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* 3. Configure the 3 Topics (Homepage) */}
-      <div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5 space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold text-slate-900">
-            Training Topics (Landing Page)
-          </h2>
-          <button
-            type="button"
-            onClick={handleSaveTopics}
-            disabled={isSavingSettings}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold transition-colors disabled:opacity-50"
-          >
-            {isSavingSettings ? (
-              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-            ) : (
-              <Save className="w-3.5 h-3.5" />
-            )}
-            <span>Save Topics</span>
-          </button>
-        </div>
-
-        {/* 3 Topics Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {topics.map((topic, index) => (
-            <div
-              key={topic.id || topic.slug || index}
-              className="p-4 rounded-lg bg-slate-50 border border-slate-200 space-y-3 flex flex-col justify-between"
-            >
-              <div className="space-y-3">
-                <div className="flex items-center justify-between border-b border-slate-200/80 pb-2">
-                  <span className="text-xs font-bold text-slate-800">
-                    Topic #{index + 1}
-                  </span>
-                  <span className="text-[10px] font-mono text-slate-400">
-                    {topic.slug}
-                  </span>
-                </div>
-
-                {/* Title */}
-                <div className="space-y-1">
-                  <label className="text-[11px] font-semibold text-slate-600 block">
-                    Title
-                  </label>
-                  <input
-                    type="text"
-                    value={topic.title || ""}
-                    onChange={(e) =>
-                      handleTopicFieldChange(index, "title", e.target.value)
-                    }
-                    className="w-full px-3 py-1.5 rounded-md bg-white border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-blue-500"
-                  />
-                </div>
-
-                {/* Description */}
-                <div className="space-y-1">
-                  <label className="text-[11px] font-semibold text-slate-600 block">
-                    Description
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={topic.description || ""}
-                    onChange={(e) =>
-                      handleTopicFieldChange(index, "description", e.target.value)
-                    }
-                    className="w-full px-3 py-1.5 rounded-md bg-white border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-blue-500 resize-none leading-relaxed"
-                  />
-                </div>
-
-                {/* Supabase Storage Image */}
-                <div className="space-y-1.5">
-                  <label className="text-[11px] font-semibold text-slate-600 flex items-center justify-between">
-                    <span>صورة الموضوع (Supabase Storage)</span>
-                    {topic.imageUrl && (
-                      <span className="text-[10px] text-emerald-600 font-medium flex items-center gap-1">
-                        <CheckCircle2 className="w-3 h-3" /> تم الرفع للتخزين السحابي
-                      </span>
-                    )}
-                  </label>
-
-                  {topic.imageUrl ? (
-                    <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-2.5 flex items-center gap-3">
-                      {/* Image Thumbnail */}
-                      <div className="relative h-14 w-14 rounded-md overflow-hidden border border-slate-200 bg-white flex-shrink-0 flex items-center justify-center">
-                        <img
-                          src={topic.imageUrl}
-                          alt=""
-                          className="h-full w-full object-cover"
-                          onError={(e) => {
-                            (e.target as HTMLElement).style.display = "none";
-                          }}
-                        />
-                      </div>
-
-                      {/* Image Details & Actions */}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[10px] font-mono text-slate-500 truncate text-left dir-ltr" title={topic.imageUrl}>
-                          {topic.imageUrl}
-                        </p>
-                        <div className="flex items-center gap-2 mt-1.5">
-                          {/* Change button */}
-                          <label
-                            className={`px-2 py-1 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 rounded text-[11px] font-medium cursor-pointer inline-flex items-center gap-1 ${
-                              uploadingTopicIndex === index ? "opacity-50 pointer-events-none" : ""
-                            }`}
-                          >
-                            {uploadingTopicIndex === index ? (
-                              <>
-                                <Loader2 className="w-3 h-3 animate-spin text-brand-navy-petrol" />
-                                <span>جارٍ الرفع...</span>
-                              </>
-                            ) : (
-                              <>
-                                <Upload className="w-3 h-3" />
-                                <span>تغيير الصورة</span>
-                              </>
-                            )}
-                            <input
-                              type="file"
-                              accept="image/*"
-                              disabled={uploadingTopicIndex === index}
-                              onChange={(e) => handleImageFileChange(index, e)}
-                              className="hidden"
-                            />
-                          </label>
-
-                          {/* Delete button */}
-                          <button
-                            type="button"
-                            onClick={() => handleTopicFieldChange(index, "imageUrl", "")}
-                            className="px-2 py-1 bg-red-50 hover:bg-red-100 text-red-600 rounded text-[11px] font-medium inline-flex items-center gap-1 transition-colors"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                            <span>حذف</span>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div>
-                      <label
-                        className={`w-full py-2.5 px-3 border border-dashed border-slate-300 hover:border-brand-navy-petrol/60 hover:bg-slate-50/80 rounded-lg cursor-pointer flex flex-col items-center justify-center gap-1 transition-colors ${
-                          uploadingTopicIndex === index ? "opacity-50 pointer-events-none bg-slate-50" : "bg-white"
-                        }`}
-                      >
-                        {uploadingTopicIndex === index ? (
-                          <>
-                            <Loader2 className="w-4 h-4 animate-spin text-brand-navy-petrol" />
-                            <span className="text-xs font-semibold text-slate-700">جارٍ الرفع إلى Supabase Storage...</span>
-                          </>
-                        ) : (
-                          <>
-                            <div className="flex items-center gap-1.5 text-slate-600">
-                              <ImageIcon className="w-4 h-4 text-brand-navy-dark" />
-                              <span className="text-xs font-semibold text-brand-navy-dark">رفع صورة عبر Supabase Storage</span>
-                            </div>
-                            <span className="text-[10px] text-slate-400">يدعم PNG, JPG, WEBP, SVG حتى 5MB</span>
-                          </>
-                        )}
-                        <input
-                          type="file"
-                          accept="image/*"
-                          disabled={uploadingTopicIndex === index}
-                          onChange={(e) => handleImageFileChange(index, e)}
-                          className="hidden"
-                        />
-                      </label>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
         </div>
       </div>
     </div>

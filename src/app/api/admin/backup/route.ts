@@ -39,23 +39,12 @@ export async function GET() {
       .select("*")
       .order("drawn_at", { ascending: false });
 
-    // 3. Fetch votes
-    const { data: votes } = await adminSupabase.from("votes").select("*");
-
-    // 4. Fetch vote counts
-    const { data: voteCounts } = await adminSupabase.from("vote_counts").select("*");
-
-    // 5. Settings & Topics from Database
+    // 3. Settings from Database
     const { data: appSettings } = await adminSupabase
       .from("app_settings")
       .select("*")
       .eq("id", 1)
       .single();
-
-    const { data: topics } = await adminSupabase
-      .from("topics")
-      .select("*")
-      .order("position", { ascending: true });
 
     const backupData = {
       version: "2.0",
@@ -63,10 +52,7 @@ export async function GET() {
       appName: "OCEANIC x Formatech 2026",
       participants: participants || [],
       winners: winners || [],
-      votes: votes || [],
-      voteCounts: voteCounts || [],
       settings: appSettings || {},
-      topics: topics || [],
     };
 
     return new NextResponse(JSON.stringify(backupData, null, 2), {
@@ -156,23 +142,6 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 3. Restore Topics to Supabase
-    if (Array.isArray(backupPayload.topics) && backupPayload.topics.length > 0) {
-      for (const t of backupPayload.topics) {
-        if (t.slug) {
-          const rawImg = t.image_url || t.imageUrl;
-          const cleanImg = rawImg && !rawImg.startsWith("data:") ? rawImg : null;
-          await adminSupabase
-            .from("topics")
-            .update({
-              title: t.title,
-              description: t.description,
-              image_url: cleanImg,
-            })
-            .eq("slug", t.slug);
-        }
-      }
-    }
 
     return NextResponse.json({
       success: true,

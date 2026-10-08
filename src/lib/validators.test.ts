@@ -1,7 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
   registrationSchema,
-  voteSchema,
   raffleDrawSchema,
   adminLoginSchema,
 } from "./validators";
@@ -105,22 +104,6 @@ describe("Registration Schema Validation", () => {
     };
 
     const res = registrationSchema.safeParse(input);
-    expect(res.success).toBe(false);
-  });
-});
-
-describe("Vote Schema Validation", () => {
-  it("passes with valid UUID", () => {
-    const res = voteSchema.safeParse({
-      topicId: "123e4567-e89b-12d3-a456-426614174000",
-    });
-    expect(res.success).toBe(true);
-  });
-
-  it("fails with non-UUID string", () => {
-    const res = voteSchema.safeParse({
-      topicId: "invalid-id",
-    });
     expect(res.success).toBe(false);
   });
 });

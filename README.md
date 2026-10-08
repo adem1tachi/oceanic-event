@@ -156,25 +156,12 @@ Open [http://localhost:3000](http://localhost:3000) in your browser. The applica
 
 ### 2. Run Database Migrations
 1. In your Supabase Dashboard, navigate to the **SQL Editor**.
-2. Click **New query**, paste the entire content of [supabase/migrations/20260924000000_init_schema.sql](file:///home/adem/Documents/My%20Projects/FormaTech/supabase/migrations/20260924000000_init_schema.sql), and click **Run**.
-3. This creates:
-   - Tables: `topics`, `votes`, `participants`, `winners`, `admins`
-   - Public view: `vote_counts`
+2. Click **New query**, paste the entire content of `supabase/schema.sql`, and click **Run**.
+3. This sets up everything automatically:
+   - Tables: `participants`, `winners`, `admins`, `app_settings`, `site_analytics`
    - Atomic Stored Procedures: `draw_winners(n int)` and `reset_draw()`
    - Strict Row Level Security (RLS) policies and permissions
-
-### 3. Seed Initial Topics
-In the **SQL Editor**, run the topic seed queries from [supabase/seed.sql](file:///home/adem/Documents/My%20Projects/FormaTech/supabase/seed.sql):
-```sql
-INSERT INTO public.topics (slug, position, is_active)
-VALUES
-    ('topic-a', 1, true),
-    ('topic-b', 2, true),
-    ('topic-c', 3, true)
-ON CONFLICT (slug) DO UPDATE
-SET position = EXCLUDED.position,
-    is_active = EXCLUDED.is_active;
-```
+   - Default application settings (`app_settings` row)
 
 ---
 

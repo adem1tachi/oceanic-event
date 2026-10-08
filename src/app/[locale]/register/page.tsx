@@ -17,7 +17,6 @@ export default async function RegisterPage({
   const t = await getTranslations();
 
   let isRegistrationOpen = true;
-  let topics: { slug: string; title?: string }[] = [];
 
   try {
     const supabase = createServerSupabaseClient();
@@ -29,19 +28,6 @@ export default async function RegisterPage({
 
     if (settingsData && settingsData.is_registration_open !== undefined) {
       isRegistrationOpen = settingsData.is_registration_open;
-    }
-
-    const { data: topicsData } = await supabase
-      .from("topics")
-      .select("slug, title")
-      .eq("is_active", true)
-      .order("position", { ascending: true });
-
-    if (topicsData) {
-      topics = topicsData.map((item) => ({
-        slug: item.slug,
-        title: item.title || undefined,
-      }));
     }
   } catch (err) {
     console.warn("[RegisterPage] Supabase error:", err);
@@ -65,7 +51,7 @@ export default async function RegisterPage({
         </div>
 
         {/* Form Component */}
-        <RegisterForm isRegistrationOpen={isRegistrationOpen} topics={topics} />
+        <RegisterForm isRegistrationOpen={isRegistrationOpen} />
       </main>
 
       <footer className="w-full border-t border-border bg-bg-surface py-6 text-center text-xs text-token-muted">

@@ -30,68 +30,6 @@ export interface Database {
         };
         Relationships: [];
       };
-      topics: {
-        Row: {
-          id: string;
-          slug: string;
-          position: number;
-          title: string | null;
-          description: string | null;
-          image_url: string | null;
-          is_active: boolean;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          slug: string;
-          position?: number;
-          title?: string | null;
-          description?: string | null;
-          image_url?: string | null;
-          is_active?: boolean;
-          created_at?: string;
-        };
-        Update: {
-          id?: string;
-          slug?: string;
-          position?: number;
-          title?: string | null;
-          description?: string | null;
-          image_url?: string | null;
-          is_active?: boolean;
-          created_at?: string;
-        };
-        Relationships: [];
-      };
-      votes: {
-        Row: {
-          id: string;
-          topic_id: string;
-          device_id: string | null;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          topic_id: string;
-          device_id?: string | null;
-          created_at?: string;
-        };
-        Update: {
-          id?: string;
-          topic_id?: string;
-          device_id?: string | null;
-          created_at?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "votes_topic_id_fkey";
-            columns: ["topic_id"];
-            isOneToOne: false;
-            referencedRelation: "topics";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
       participants: {
         Row: {
           id: string;
@@ -216,15 +154,7 @@ export interface Database {
       };
     };
     Views: {
-      vote_counts: {
-        Row: {
-          topic_id: string;
-          topic_slug: string;
-          topic_position: number;
-          count: number;
-        };
-        Relationships: [];
-      };
+      [_ in never]: never;
     };
     Functions: {
       draw_winners: {
