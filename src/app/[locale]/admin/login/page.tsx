@@ -52,16 +52,12 @@ export default function AdminLoginPage() {
       if (authError || !data.user) {
         console.error("Supabase Auth Error details:", authError);
 
-        if (authError?.message?.toLowerCase().includes("email not confirmed")) {
+        if (authError?.message?.toLowerCase().includes("fetch")) {
           setError(
-            "البريد الإلكتروني لم يتم تأكيده بعد في Supabase. يرجى تفعيل خيار 'Auto Confirm User' أو تأكيد البريد من لوحة Supabase (Authentication -> Users -> Auto Confirm)."
-          );
-        } else if (authError?.message?.toLowerCase().includes("fetch")) {
-          setError(
-            "تعذر الاتصال بـ Supabase. يرجى التأكد من صحة رابط المشروع NEXT_PUBLIC_SUPABASE_URL في ملف .env.local والاتصال بالإنترنت."
+            "تعذر الاتصال بـ Supabase. يرجى التأكد من الاتصال بالإنترنت وصحة الإعدادات."
           );
         } else {
-          setError(t("invalidCredentials") + ` (${authError?.message || "Invalid credentials"})`);
+          setError(t("invalidCredentials"));
         }
         setIsSubmitting(false);
         return;
@@ -81,9 +77,7 @@ export default function AdminLoginPage() {
       if (!adminRecord) {
         // Not an authorized admin - immediately sign them out
         await supabase.auth.signOut();
-        setError(
-          t("unauthorized") + ` (المستخدم موجود في Auth ولكن لم تتم إضافته إلى جدول public.admins بـ UUID: ${data.user.id})`
-        );
+        setError(t("unauthorized"));
         setIsSubmitting(false);
         return;
       }
@@ -93,7 +87,7 @@ export default function AdminLoginPage() {
       router.refresh();
     } catch (err: any) {
       console.error("Login failure exception:", err);
-      setError(`خطأ أثناء تسجيل الدخول: ${err?.message || "Internal error"}`);
+      setError("حدث خطأ أثناء محاولة تسجيل الدخول، يرجى المحاولة لاحقاً.");
       setIsSubmitting(false);
     }
   };

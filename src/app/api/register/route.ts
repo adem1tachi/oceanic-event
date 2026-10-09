@@ -2,12 +2,32 @@ import { NextRequest, NextResponse } from "next/server";
 import { registrationSchema } from "@/lib/validators";
 import { normalizeAlgerianPhone } from "@/lib/phone";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
   try {
+    // 0. IP-based Rate Limiting (max 10 registration submissions per 10 minutes per IP)
+    const clientIp = getClientIp(request.headers);
+    const rateLimit = checkRateLimit(`register:${clientIp}`, 10, 10 * 60 * 1000);
+
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        {
+          error: "تم تجاوز الحد الأقصى للمحاولات، يرجى المحاولة بعد قليل",
+          code: "RATE_LIMITED",
+        },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": "600",
+          },
+        }
+      );
+    }
+
     const adminSupabase = createAdminClient();
 
-    // 0. Verify registration status from database
+    // Verify registration status from database
     const { data: settingsData } = await adminSupabase
       .from("app_settings")
       .select("is_registration_open")
@@ -17,7 +37,7 @@ export async function POST(request: NextRequest) {
     if (settingsData && settingsData.is_registration_open === false) {
       return NextResponse.json(
         {
-          error: "تم إغلاق استمارة التسجيل في السحب حالياً",
+          error: "تم إغلاق استمارة التسجيل حالياً",
           code: "REGISTRATION_CLOSED",
         },
         { status: 403 }

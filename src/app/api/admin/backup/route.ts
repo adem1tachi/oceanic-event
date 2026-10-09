@@ -1,8 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
+
+const backupRestoreParticipantSchema = z.object({
+  full_name: z.string().trim().max(150).optional(),
+  phone: z.string().trim().min(9).max(25),
+  email: z.string().trim().max(150).nullable().optional(),
+  first_name: z.string().trim().max(100).nullable().optional(),
+  last_name: z.string().trim().max(100).nullable().optional(),
+  position: z.string().trim().max(150).nullable().optional(),
+  company: z.string().trim().max(150).nullable().optional(),
+  desired_topic: z.string().trim().max(200).nullable().optional(),
+  people_count: z.number().int().min(1).max(500).optional().default(1),
+  consent: z.boolean().optional().default(true),
+  locale: z.string().max(10).optional().default("en"),
+  created_at: z.string().optional(),
+});
+
+const backupRestoreSchema = z.object({
+  participants: z.array(backupRestoreParticipantSchema).max(5000).optional(),
+  settings: z.record(z.any()).optional(),
+});
 
 export async function GET() {
   try {
@@ -89,11 +110,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const backupPayload = await request.json();
+    const rawPayload = await request.json().catch(() => null);
+    const parseResult = backupRestoreSchema.safeParse(rawPayload);
 
-    if (!backupPayload || typeof backupPayload !== "object") {
-      return NextResponse.json({ error: "Invalid backup file format" }, { status: 400 });
+    if (!parseResult.success) {
+      return NextResponse.json(
+        { error: "Invalid backup file: format or data validation failed" },
+        { status: 400 }
+      );
     }
+
+    const backupPayload = parseResult.data;
 
     const adminSupabase = createAdminClient();
     let restoredParticipants = 0;

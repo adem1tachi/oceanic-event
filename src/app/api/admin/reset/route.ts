@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import fs from "fs";
-import path from "path";
 
 export async function POST() {
   try {
@@ -119,33 +117,6 @@ export async function POST() {
       }
     } catch (settingsResetErr) {
       console.warn("[API Admin Reset] Error resetting app_settings contact_statuses:", settingsResetErr);
-    }
-
-    // 4. Reset statuses in local settings.json if it exists
-    try {
-      const settingsFilePath = path.join(process.cwd(), "src", "data", "settings.json");
-      if (fs.existsSync(settingsFilePath)) {
-        const fileData = fs.readFileSync(settingsFilePath, "utf-8");
-        const parsed = JSON.parse(fileData);
-        if (parsed.contactStatuses) {
-          let jsonChanged = false;
-          winnerParticipantIds.forEach((id) => {
-            parsed.contactStatuses[id] = "new";
-            jsonChanged = true;
-          });
-          for (const key of Object.keys(parsed.contactStatuses)) {
-            if (parsed.contactStatuses[key] === "winner") {
-              parsed.contactStatuses[key] = "new";
-              jsonChanged = true;
-            }
-          }
-          if (jsonChanged) {
-            fs.writeFileSync(settingsFilePath, JSON.stringify(parsed, null, 2), "utf-8");
-          }
-        }
-      }
-    } catch (fileErr) {
-      console.warn("[API Admin Reset] Error updating settings.json:", fileErr);
     }
 
     return NextResponse.json({ success: true });

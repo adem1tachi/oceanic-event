@@ -8,7 +8,19 @@ const intlMiddleware = createIntlMiddleware(routing);
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Let Next.js internal requests, API routes, and static assets pass untouched
+  // Protect admin API endpoints before any processing
+  if (pathname.startsWith("/api/admin")) {
+    const { response, user, isAdmin } = await updateSession(request);
+    if (!user || !isAdmin) {
+      return NextResponse.json(
+        { error: "Unauthorized: Administrator privileges required" },
+        { status: 401 }
+      );
+    }
+    return response;
+  }
+
+  // Let Next.js internal requests, public API routes, and static assets pass untouched
   if (
     pathname.startsWith("/api") ||
     pathname.startsWith("/_next") ||

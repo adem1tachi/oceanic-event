@@ -368,14 +368,14 @@ export function RegisterForm({
               <AlertCircle className="w-5 h-5 shrink-0" />
               <span>
                 {locale === "ar"
-                  ? "تم إغلاق استمارة التسجيل في السحب حالياً"
-                  : "Registration for the draw is currently closed"}
+                  ? "تم إغلاق استمارة التسجيل حالياً"
+                  : "Registration is currently closed"}
               </span>
             </div>
             <p className="text-xs sm:text-sm text-token-secondary leading-relaxed">
               {locale === "ar"
-                ? "نشكركم على اهتمامكم وتواجدكم معنا في جناح OCEANIC ضمن معرض Formatech 2026. تم إيقاف استقبال المشاركات الجديدة في سحب اليوم. ترقبوا إعلان الفائزين عند اختتام المعرض!"
-                : "Thank you for visiting the OCEANIC stand at Formatech 2026. Submissions for today's raffle draw are currently closed. Stay tuned for the winners announcement at the end of the fair!"}
+                ? "نشكركم على اهتمامكم وتواجدكم معنا في جناح OCEANIC ضمن معرض Formatech 2026. تم إيقاف استقبال المشاركات الجديدة في الوقت الحالي."
+                : "Thank you for visiting the OCEANIC stand at Formatech 2026. Registration submissions are currently closed."}
             </p>
           </div>
         ) : (

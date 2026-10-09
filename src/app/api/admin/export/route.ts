@@ -50,10 +50,13 @@ export async function GET() {
       .maybeSingle();
     const statuses = (appSettings?.contact_statuses as Record<string, string>) || {};
 
-    // Escape CSV cell helper
+    // Escape CSV cell helper and neutralize formula injection (CWE-1236)
     const escapeCsv = (val: string | number | boolean | null | undefined): string => {
       if (val === null || val === undefined) return '""';
-      const str = String(val).replace(/"/g, '""');
+      let str = String(val).replace(/"/g, '""');
+      if (/^[=+@\-\t\r]/.test(str)) {
+        str = `'${str}`;
+      }
       return `"${str}"`;
     };
 

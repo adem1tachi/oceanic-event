@@ -219,12 +219,12 @@ CREATE POLICY "Admins can manage app settings"
     USING (public.is_admin());
 
 -- Site Analytics policies
-CREATE POLICY "Allow public insert to site_analytics"
-    ON public.site_analytics FOR INSERT
-    WITH CHECK (true);
-
-CREATE POLICY "Allow admins select on site_analytics"
+CREATE POLICY "Admins can view site_analytics"
     ON public.site_analytics FOR SELECT
+    USING (public.is_admin());
+
+CREATE POLICY "Admins can manage site_analytics"
+    ON public.site_analytics FOR ALL
     USING (public.is_admin());
 
 -- ==============================================================================
@@ -232,10 +232,8 @@ CREATE POLICY "Allow admins select on site_analytics"
 -- ==============================================================================
 GRANT USAGE ON SCHEMA public TO anon, authenticated;
 
--- Public access
+-- Public access (Read-only for app settings)
 GRANT SELECT ON public.app_settings TO anon, authenticated;
-GRANT INSERT ON public.site_analytics TO anon, authenticated;
-GRANT SELECT ON public.site_analytics TO authenticated;
 
 -- Service role & authenticated access
 GRANT ALL ON public.participants TO authenticated, service_role;
